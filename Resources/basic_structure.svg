@@ -1,0 +1,202 @@
+<svg width="700" height="1540" viewBox="0 0 700 1540" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#444441" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+<marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#A32D2D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<rect width="700" height="1540" fill="#FFFFFF"/>
+
+<!-- TITLE -->
+<text x="340" y="36" text-anchor="middle" font-size="18" font-weight="bold" fill="#2C2C2A">House design pipeline — execution order</text>
+<text x="340" y="56" text-anchor="middle" font-size="12" fill="#5F5E5A">Sequential = solid black arrow · Parallel = side-by-side same row · Conditional = dashed grey · Retry/feedback = red dashed</text>
+
+<!-- STEP 1: User input -->
+<rect x="240" y="76" width="200" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="340" y="98" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C2C2A">User prompt</text>
+<line x1="340" y1="120" x2="340" y2="148" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- STEP 2: Planner Agent -->
+<rect x="220" y="148" width="240" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="340" y="168" text-anchor="middle" font-size="14" font-weight="bold" fill="#26215C">1. Planner / Customer Support</text>
+<text x="340" y="186" text-anchor="middle" font-size="12" fill="#3C3489">disambiguates location, builds brief</text>
+<line x1="340" y1="204" x2="340" y2="232" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- STEP 3: Agent Manager hub -->
+<rect x="200" y="232" width="280" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="340" y="252" text-anchor="middle" font-size="14" font-weight="bold" fill="#2C2C2A">2. Agent Manager</text>
+<text x="340" y="270" text-anchor="middle" font-size="12" fill="#5F5E5A">routes every step below · JSON-RPC · Pydantic validated</text>
+<line x1="340" y1="288" x2="340" y2="316" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- STEP 4: PARALLEL ROW - Location Zoning + Guardrail -->
+<text x="340" y="312" text-anchor="middle" font-size="12" fill="#0F6E56" font-weight="bold">3. PARALLEL — rules &amp; safety check</text>
+<rect x="70" y="320" width="170" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="155" y="340" text-anchor="middle" font-size="13" font-weight="bold" fill="#04342C">Location Zoning Agent</text>
+<text x="155" y="358" text-anchor="middle" font-size="11" fill="#085041">resolve jurisdiction rules</text>
+
+<rect x="255" y="320" width="170" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="340" y="340" text-anchor="middle" font-size="13" font-weight="bold" fill="#04342C">Constraint Agent</text>
+<text x="340" y="358" text-anchor="middle" font-size="11" fill="#085041">+ Entity Constraint Engine</text>
+
+<rect x="440" y="320" width="170" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="525" y="340" text-anchor="middle" font-size="13" font-weight="bold" fill="#04342C">Guardrail Tools</text>
+<text x="525" y="358" text-anchor="middle" font-size="11" fill="#085041">block illegal requests</text>
+
+<line x1="155" y1="376" x2="155" y2="404" stroke="#444441" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="340" y1="376" x2="340" y2="404" stroke="#444441" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="525" y1="376" x2="525" y2="404" stroke="#444441" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="155" y1="404" x2="525" y2="404" stroke="#444441" stroke-width="1"/>
+<line x1="340" y1="404" x2="340" y2="424" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<text x="340" y="420" text-anchor="middle" font-size="11" fill="#5F5E5A">merge: combined ruleset</text>
+
+<!-- STEP 5: Topography (conditional - only if uneven lot) -->
+<line x1="340" y1="440" x2="340" y2="468" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="200" y="468" width="280" height="56" rx="8" stroke-dasharray="5,4" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="340" y="488" text-anchor="middle" font-size="14" font-weight="bold" fill="#412402">4. Topography (conditional)</text>
+<text x="340" y="506" text-anchor="middle" font-size="11" fill="#633806">only runs if lot has &gt;10ft elevation diff</text>
+<line x1="340" y1="524" x2="340" y2="552" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- STEP 6: Site Plan Generator -->
+<rect x="200" y="552" width="280" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="340" y="572" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A1B0C">5. Site Plan Generator Agent</text>
+<text x="340" y="590" text-anchor="middle" font-size="12" fill="#712B13">generates building footprint/envelope</text>
+
+<!-- Verify loop 1 -->
+<line x1="480" y1="580" x2="540" y2="580" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="540" y="552" width="120" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="600" y="572" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A1B0C">Verifier</text>
+<text x="600" y="590" text-anchor="middle" font-size="11" fill="#712B13">+ Z3 solver</text>
+<path d="M600 552 C600 530, 470 530, 460 552" fill="none" stroke="#A32D2D" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#arrowRed)"/>
+<text x="530" y="525" text-anchor="middle" font-size="10" fill="#A32D2D">retry on fail (capped)</text>
+
+<line x1="340" y1="608" x2="340" y2="636" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="430" y="630" font-size="11" fill="#5F5E5A">pass →</text>
+
+<!-- STEP 7: Floor Plan Generator -->
+<rect x="200" y="636" width="280" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="340" y="656" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A1B0C">6. Floor Plan Generator Agent</text>
+<text x="340" y="674" text-anchor="middle" font-size="12" fill="#712B13">tiles rooms inside verified footprint</text>
+
+<line x1="480" y1="664" x2="540" y2="664" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="540" y="636" width="120" height="56" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="600" y="656" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A1B0C">Json Extractor</text>
+<text x="600" y="674" text-anchor="middle" font-size="11" fill="#712B13">→ Verifier</text>
+<path d="M600 636 C600 614, 470 614, 460 636" fill="none" stroke="#A32D2D" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#arrowRed)"/>
+<text x="530" y="609" text-anchor="middle" font-size="10" fill="#A32D2D">retry on fail (capped)</text>
+
+<line x1="340" y1="692" x2="340" y2="720" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- STEP 8: Conditional fork - Multi-floor -->
+<polygon points="340,720 400,752 340,784 280,752" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="340" y="748" text-anchor="middle" font-size="11" font-weight="bold" fill="#412402">Multi-floor?</text>
+<text x="340" y="764" text-anchor="middle" font-size="10" fill="#633806">requested</text>
+
+<line x1="400" y1="752" x2="460" y2="752" stroke="#444441" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+<text x="470" y="748" font-size="11" fill="#5F5E5A">yes</text>
+<rect x="460" y="724" width="150" height="56" rx="8" stroke-dasharray="5,4" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="535" y="744" text-anchor="middle" font-size="12" font-weight="bold" fill="#412402">7a. Elevation Agent</text>
+<text x="535" y="760" text-anchor="middle" font-size="10" fill="#633806">+ Multi-floor Generator</text>
+<text x="535" y="800" text-anchor="middle" font-size="10" fill="#5F5E5A">settles floor-to-floor,</text>
+<text x="535" y="812" text-anchor="middle" font-size="10" fill="#5F5E5A">then rejoins below</text>
+
+<line x1="280" y1="752" x2="220" y2="752" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="240" y="748" font-size="11" fill="#5F5E5A">no</text>
+<rect x="80" y="724" width="140" height="56" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="150" y="744" text-anchor="middle" font-size="12" font-weight="bold" fill="#2C2C2A">skip</text>
+<text x="150" y="760" text-anchor="middle" font-size="10" fill="#5F5E5A">single floor stays as-is</text>
+
+<line x1="150" y1="780" x2="150" y2="830" stroke="#444441" stroke-width="1.5"/>
+<line x1="535" y1="780" x2="535" y2="830" stroke="#444441" stroke-width="1.5"/>
+<line x1="150" y1="830" x2="535" y2="830" stroke="#444441" stroke-width="1.5"/>
+<line x1="340" y1="830" x2="340" y2="858" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="340" y="824" text-anchor="middle" font-size="10" fill="#5F5E5A">rejoin</text>
+
+<!-- STEP 9: Livability (parallel, soft check) -->
+<rect x="200" y="858" width="280" height="56" rx="8" stroke-dasharray="5,4" fill="#FBEAF0" stroke="#993556" stroke-width="0.5"/>
+<text x="340" y="878" text-anchor="middle" font-size="14" font-weight="bold" fill="#4B1528">8. Livability Agent (parallel, soft)</text>
+<text x="340" y="896" text-anchor="middle" font-size="11" fill="#72243E">scores daylight/airflow — non-blocking</text>
+<line x1="340" y1="914" x2="340" y2="942" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<!-- STEP 10: PARALLEL ROW - exports -->
+<text x="340" y="938" text-anchor="middle" font-size="12" fill="#185FA5" font-weight="bold">9. PARALLEL — output generation</text>
+<rect x="40" y="946" width="155" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="117" y="966" text-anchor="middle" font-size="12" font-weight="bold" fill="#042C53">Side Views Agent</text>
+<text x="117" y="984" text-anchor="middle" font-size="10" fill="#0C447C">elevation drawings</text>
+
+<rect x="210" y="946" width="155" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="287" y="966" text-anchor="middle" font-size="12" font-weight="bold" fill="#042C53">Roof Plan Agent</text>
+<text x="287" y="984" text-anchor="middle" font-size="10" fill="#0C447C">roof geometry</text>
+
+<rect x="380" y="946" width="125" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="442" y="966" text-anchor="middle" font-size="12" font-weight="bold" fill="#042C53">DXF Generator</text>
+<text x="442" y="984" text-anchor="middle" font-size="10" fill="#0C447C">CAD export</text>
+
+<rect x="520" y="946" width="120" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="580" y="966" text-anchor="middle" font-size="12" font-weight="bold" fill="#042C53">PDF generation</text>
+<text x="580" y="984" text-anchor="middle" font-size="10" fill="#0C447C">300+ DPI report</text>
+
+<line x1="117" y1="1002" x2="117" y2="1030" stroke="#444441" stroke-width="1"/>
+<line x1="287" y1="1002" x2="287" y2="1030" stroke="#444441" stroke-width="1"/>
+<line x1="442" y1="1002" x2="442" y2="1030" stroke="#444441" stroke-width="1"/>
+<line x1="580" y1="1002" x2="580" y2="1030" stroke="#444441" stroke-width="1"/>
+<line x1="117" y1="1030" x2="580" y2="1030" stroke="#444441" stroke-width="1"/>
+<line x1="340" y1="1030" x2="340" y2="1058" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="340" y="1046" text-anchor="middle" font-size="10" fill="#5F5E5A">merge: combined output package</text>
+
+<!-- STEP 11: Reviewer (City) Agent -->
+<rect x="200" y="1058" width="280" height="56" rx="8" fill="#FBEAF0" stroke="#993556" stroke-width="0.5"/>
+<text x="340" y="1078" text-anchor="middle" font-size="14" font-weight="bold" fill="#4B1528">10. Reviewer (City) Agent</text>
+<text x="340" y="1096" text-anchor="middle" font-size="12" fill="#72243E">human-in-the-loop, element-by-element sign-off</text>
+
+<line x1="340" y1="1114" x2="340" y2="1130" stroke="#444441" stroke-width="1.5"/>
+<polygon points="340,1130 400,1160 340,1190 280,1160" fill="#FBEAF0" stroke="#993556" stroke-width="0.5"/>
+<text x="340" y="1156" text-anchor="middle" font-size="11" font-weight="bold" fill="#4B1528">Approved?</text>
+
+<path d="M280 1160 L 665 1160 L 665 664 L 480 664" fill="none" stroke="#A32D2D" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#arrowRed)"/>
+<circle cx="665" cy="900" r="9" fill="#FCEBEB" stroke="#A32D2D" stroke-width="1"/>
+<text x="665" y="904" font-size="11" font-weight="bold" fill="#A32D2D" text-anchor="middle">A</text>
+
+<line x1="400" y1="1160" x2="460" y2="1160" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="430" y="1150" font-size="11" fill="#5F5E5A">yes</text>
+
+<!-- STEP 12: UI + Notification -->
+<rect x="460" y="1132" width="180" height="56" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="550" y="1152" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C2C2A">11. UI + Notification</text>
+<text x="550" y="1170" text-anchor="middle" font-size="11" fill="#5F5E5A">notifies all 3 personas</text>
+
+<line x1="550" y1="1188" x2="550" y2="1216" stroke="#444441" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<rect x="460" y="1216" width="180" height="44" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="550" y="1238" text-anchor="middle" font-size="13" font-weight="bold" fill="#2C2C2A">Final report delivered</text>
+
+<!-- CONTINUOUS BACKGROUND PROCESSES BOX -->
+<rect x="40" y="1300" width="600" height="180" rx="14" stroke-dasharray="4,4" fill="#FFFFFF" stroke="#888780" stroke-width="0.7"/>
+<text x="60" y="1326" font-size="13" font-weight="bold" fill="#2C2C2A">Always running in background (not sequential steps)</text>
+
+<rect x="60" y="1340" width="160" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="140" y="1362" text-anchor="middle" font-size="12" fill="#2C2C2A">Database</text>
+<text x="140" y="1378" text-anchor="middle" font-size="10" fill="#5F5E5A">Supabase + Qdrant</text>
+
+<rect x="240" y="1340" width="180" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="330" y="1362" text-anchor="middle" font-size="12" fill="#2C2C2A">Optimizations/Keys/Auth</text>
+<text x="330" y="1378" text-anchor="middle" font-size="10" fill="#5F5E5A">API key rotation, cost track</text>
+
+<rect x="440" y="1340" width="160" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="520" y="1362" text-anchor="middle" font-size="12" fill="#2C2C2A">Deployment Engine</text>
+<text x="520" y="1378" text-anchor="middle" font-size="10" fill="#5F5E5A">hosts the whole service</text>
+
+<rect x="60" y="1400" width="260" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="190" y="1422" text-anchor="middle" font-size="12" fill="#2C2C2A">CAD/DXF file readers</text>
+<text x="190" y="1438" text-anchor="middle" font-size="10" fill="#5F5E5A">on-demand, for similarity requests</text>
+
+<rect x="340" y="1400" width="260" height="44" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+<text x="470" y="1422" text-anchor="middle" font-size="12" fill="#2C2C2A">End-End Validation</text>
+<text x="470" y="1438" text-anchor="middle" font-size="10" fill="#5F5E5A">runs full scenarios against all of the above</text>
+
+<text x="340" y="1466" text-anchor="middle" font-size="10" fill="#5F5E5A">these are queried by other agents at any point — not waiting in the sequence above</text>
+
+</svg>
