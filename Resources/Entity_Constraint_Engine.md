@@ -21,13 +21,8 @@ This comes from Location Zoning Agent, already structured, already resolved — 
 The one place user input could indirectly touch your work: if a user later wants a custom rule (like "I want bigger bedrooms than the minimum"), that would come back through Planner → Agent Manager as a structured override request, not raw text — but that's not built yet and isn't in scope for your current rows. If it comes up, flag it and we'll figure out where that override gets injected.
 
 
-
 The execution layer behind the Constraint Agent: this is literally where per entity rules (bedroom minimum size, adjacent room rules, hallway connection requirements) get encoded and checked for every entity in the design.
- 
 
-Must encode constraints at the entity level (per room, per wall, per fixture) so a new entity type can have its own rule set without touching unrelated entities' rules. Must support relational constraints between entities (adjacency, connectivity to hallway, “must have a bathroom nearby”), not just single entity size/shape rules, since this was the specific gap the mentor called out (“what are the adjacent things you can have in a bedroom”). Must be the single source of truth consumed by both the Floor Plan Generator and the Verifier Agent's Z3 checks. Must be versionable so constraint changes can be tracked as the rule set grows over the project.
- 
- 
  	
 Must encode constraints at the entity level (per room, per wall, per fixture) so a new entity type can have its own rule set without touching unrelated entities' rules. Must support relational constraints between entities (adjacency, connectivity to hallway, “must have a bathroom nearby”), not just single entity size/shape rules, since this was the specific gap the mentor called out (“what are the adjacent things you can have in a bedroom”). Must be the single source of truth consumed by both the Floor Plan Generator and the Verifier Agent's Z3 checks. Must be versionable so constraint changes can be tracked as the rule set grows over the project.
 

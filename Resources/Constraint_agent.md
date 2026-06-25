@@ -36,6 +36,5 @@ Must maintain a constraint definition for every entity type in the system (room,
  ☐ Minimum bedroom size enforced (specific number agreed with mentor before sprint sign-off)
  ☐ Every room type has at least one defined adjacency/connectivity rule (e.g. must connect to a hallway)
  
- 
 
  we need to cover Bellevue, Redmond, and Kirkland, along with Seattle and Bothell (those two are slightly lower priority).
