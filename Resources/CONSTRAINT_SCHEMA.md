@@ -23,6 +23,8 @@ Site Plan Generator emits footprints in.
 | `tolerance_ft` | number | float tolerance, e.g. `1e-6` |
 | `exterior` | object | site/zoning rules (below) |
 | `interior` | object | room program + spatial rules (below) |
+| `descriptions` | object | **🆕** mapping of constraint keys to their plain-language legal definitions |
+| `constraint_levels` | object | **🆕** mapping of constraint keys to their enforcement level (`hard` or `soft`) |
 
 ## `exterior`
 
@@ -105,6 +107,15 @@ Site Plan Generator emits footprints in.
     ],
     "corridor_max_fraction_of_usable": 0.15,
     "coverage_tol_fraction": 0.05
+  },
+  "descriptions": {
+    "front_setback_ft": "Minimum front property line setback in feet.",
+    "min_area_ft2": "Minimum area in square feet for the room."
+  },
+  "constraint_levels": {
+    "front_setback_ft": "hard",
+    "min_area_ft2": "hard",
+    "requires_egress": "soft"
   }
 }
 ```

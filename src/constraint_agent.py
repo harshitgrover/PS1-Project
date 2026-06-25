@@ -27,6 +27,17 @@ class ConstraintAgent:
         "geometry_file": "File path to the raw lot geometry."
     }
 
+    DEFAULT_CONSTRAINT_LEVELS = {
+        # Soft constraints
+        "requires_egress": "soft",
+        "requires_exterior_window": "soft",
+        "ventilation_type": "soft",
+        "requires_garage_mechanical_ventilation_interlock": "soft",
+        
+        # Hard constraints (fallback default for everything else)
+        # Note: We will default to "hard" for any key not explicitly listed as "soft"
+    }
+
     def __init__(self, db_path=DEFAULT_DB_PATH):
         self.db_path = db_path
         self.entity_engine = EntityConstraintEngine(db_path)
@@ -226,6 +237,23 @@ class ConstraintAgent:
             if key not in descriptions and key in self.DEFAULT_DESCRIPTIONS:
                 descriptions[key] = self.DEFAULT_DESCRIPTIONS[key]
 
+        # Ensure constraint_levels are assigned
+        constraint_levels = {}
+        # We assign levels based on all defined descriptions and keys in exterior/interior/room_specs
+        
+        def assign_level(k):
+            return self.DEFAULT_CONSTRAINT_LEVELS.get(k, "hard")
+            
+        for key in descriptions.keys():
+            constraint_levels[key] = assign_level(key)
+            
+        for key in exterior.keys():
+            constraint_levels[key] = assign_level(key)
+            
+        for room, specs in room_specs.items():
+            for spec_key in specs.keys():
+                constraint_levels[spec_key] = assign_level(spec_key)
+
         final_schema = {
             "jurisdiction": jurisdiction_name,
             "schema_version": schema_version,
@@ -234,7 +262,8 @@ class ConstraintAgent:
             "tolerance_ft": tolerance_ft,
             "exterior": exterior,
             "interior": interior,
-            "descriptions": descriptions
+            "descriptions": descriptions,
+            "constraint_levels": constraint_levels
         }
         
         # 5. Hash, save to DB, and return ID
