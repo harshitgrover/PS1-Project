@@ -102,7 +102,7 @@ python3 extract_file.py zoning_3ded7e729f3d
 
 To debug or query the raw baseline rules for a specific entity type (e.g. what are the default rules for a bedroom?), run the engine directly. You can pass multiple entities separated by spaces, or pass `all` to output everything. The outputs are automatically saved to the `src/Entity_Constraints` folder.
 
-*(Currently available entities: `bedroom`, `bathroom`, `kitchen`, `living`, `dining`, `corridor`, `laundry`, `garage`)*
+*(Currently available entities: `bedroom`, `bathroom`, `kitchen`, `living`, `dining`, `corridor`, `laundry`, `garage`, `balcony`)*
 
 **For a specific room:**
 ```bash

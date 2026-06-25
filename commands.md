@@ -49,7 +49,7 @@ python3 extract_file.py zoning_3ded7e729f3d
 
 To see the pure architectural baseline rules for a specific room type *before* it gets merged into a final ruleset, run the Engine directly with a room name. You can pass multiple rooms, or use `all` to see the complete internal architectural dictionary. The output will automatically be saved into the `src/Entity_Constraints` folder.
 
-*(Currently available entities: `bedroom`, `bathroom`, `kitchen`, `living`, `dining`, `corridor`, `laundry`, `garage`)*
+*(Currently available entities: `bedroom`, `bathroom`, `kitchen`, `living`, `dining`, `corridor`, `laundry`, `garage`, `balcony`)*
 
 **For a specific room:**
 ```bash
