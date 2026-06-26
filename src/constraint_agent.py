@@ -129,7 +129,7 @@ class ConstraintAgent:
         
         # 2. Fetch Interior rules ONLY for required entities
         # Baseline minimums required for a valid layout
-        required_rooms = { "bathroom": 2, "bedroom": 2, "living": 1, "kitchen": 1 }
+        required_rooms = { "bathroom": 2, "bedroom": 2, "living": 1, "kitchen": 1, "corridor": 1 }
         
         # 2.1 Parse user constraints via LLM if provided
         room_overrides = {}

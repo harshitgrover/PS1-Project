@@ -6,13 +6,11 @@
     "front_setback_ft": "hard",
     "geometry_file": "hard",
     "habitable": "hard",
-    "max_area_ft2": "hard",
     "max_aspect_ratio": "hard",
     "max_far": "hard",
     "max_height_ft": "hard",
     "max_impervious_surface_pct": "hard",
     "max_lot_coverage_fraction": "hard",
-    "max_side_ft": "hard",
     "max_vehicle_parking_spaces_per_unit": "hard",
     "min_area_fraction_of_max": "hard",
     "min_area_ft2": "hard",
@@ -75,26 +73,12 @@
   "interior": {
     "adjacency_rules": [
       {
-        "a": "bathroom",
-        "b": "bedroom",
-        "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall.",
+        "a": "bedroom",
+        "b": "corridor",
+        "description": "Bedroom must connect to a corridor sharing at least 3ft of wall.",
         "level": "hard",
-        "min_shared_wall_ft": 4.0,
-        "relation": "ensuite_required"
-      },
-      {
-        "a": "bathroom",
-        "b": "kitchen",
-        "description": "Bathroom must not share a wall with the kitchen.",
-        "level": "hard",
-        "relation": "must_not_touch"
-      },
-      {
-        "a": "bathroom",
-        "b": "bathroom",
-        "description": "Bathrooms must not share a wall with each other.",
-        "level": "hard",
-        "relation": "must_not_touch"
+        "min_shared_wall_ft": 3.0,
+        "relation": "must_touch"
       },
       {
         "a": "bedroom",
@@ -104,19 +88,19 @@
         "relation": "must_not_touch"
       },
       {
-        "a": "bedroom",
-        "b": "bathroom",
-        "description": "Bedroom to Bathroom must be < 25 ft.",
+        "a": "living",
+        "b": "kitchen",
+        "description": "Kitchen must connect to the living room sharing at least 2.5ft of wall.",
         "level": "hard",
-        "max_dist_ft": 25.0,
-        "relation": "distance_limit"
+        "min_shared_wall_ft": 2.5,
+        "relation": "must_touch"
       }
     ],
     "area_rules": [
       {
-        "description": "Bathroom must be smaller than the bedroom it serves.",
+        "description": "Living room must be larger than each individual bedroom.",
         "level": "hard",
-        "rule": "bathroom_lt_served_bedroom"
+        "rule": "living_gt_each_bedroom"
       }
     ],
     "corridor_max_fraction_of_usable": 0.15,
@@ -125,51 +109,59 @@
     "max_vehicle_parking_spaces_per_unit": 1.5,
     "min_bicycle_parking_spaces_per_unit": 1.0,
     "required_rooms": {
-      "bathroom": 2,
-      "bedroom": 3,
-      "kitchen": 1
+      "bedroom": 5,
+      "corridor": 1,
+      "kitchen": 2,
+      "living": 1
     },
     "room_specs": {
-      "bathroom": {
-        "habitable": false,
-        "max_aspect_ratio": 2.0,
-        "max_side_ft": 15.0,
-        "min_area_ft2": 25.0,
-        "min_aspect_ratio": 1.0,
-        "min_side_ft": 5.0,
-        "requires_closet": false,
-        "requires_door": true,
-        "requires_egress": false,
-        "requires_exterior_window": false,
-        "ventilation_type": "exhaust"
-      },
       "bedroom": {
         "habitable": true,
-        "max_area_ft2": 132.0,
         "max_aspect_ratio": 1.8,
-        "max_side_ft": 15.0,
-        "min_area_ft2": 108.0,
+        "min_area_ft2": 70.0,
         "min_aspect_ratio": 1.0,
-        "min_side_ft": 9.0,
+        "min_side_ft": 7.0,
         "requires_closet": true,
         "requires_door": true,
         "requires_egress": true,
         "requires_exterior_window": true,
         "ventilation_type": "natural"
       },
+      "corridor": {
+        "habitable": false,
+        "max_aspect_ratio": 10.0,
+        "min_area_ft2": 16.0,
+        "min_aspect_ratio": 3.0,
+        "min_side_ft": 4.0,
+        "requires_closet": false,
+        "requires_door": false,
+        "requires_egress": false,
+        "requires_exterior_window": false,
+        "ventilation_type": "none"
+      },
       "kitchen": {
         "habitable": true,
-        "max_area_ft2": 158.4,
         "max_aspect_ratio": 2.0,
-        "max_side_ft": 13.2,
-        "min_area_ft2": 129.6,
+        "min_area_ft2": 500,
         "min_aspect_ratio": 1.0,
-        "min_side_ft": 10.8,
+        "min_side_ft": 7.0,
         "requires_closet": false,
         "requires_door": true,
         "requires_egress": false,
         "requires_exterior_window": false,
         "ventilation_type": "mechanical_or_natural"
+      },
+      "living": {
+        "habitable": true,
+        "max_aspect_ratio": 2.0,
+        "min_area_ft2": 70.0,
+        "min_aspect_ratio": 1.2,
+        "min_side_ft": 7.0,
+        "requires_closet": false,
+        "requires_door": true,
+        "requires_egress": false,
+        "requires_exterior_window": true,
+        "ventilation_type": "natural"
       }
     }
   },
