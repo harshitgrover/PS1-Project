@@ -22,10 +22,9 @@ class EntityConstraintEngine:
         
         # 1. Get entity size rules and feature rules
         cursor.execute('''
-            SELECT version, min_area_ft2, min_side_ft, max_side_ft, habitable,
-                   min_aspect_ratio, max_aspect_ratio, requires_exterior_window,
-                   requires_egress, ventilation_type, requires_door, requires_closet
-            FROM EntitySpecs WHERE entity_type=?
+            SELECT min_area_ft2, min_side_ft, max_side_ft, habitable, min_aspect_ratio, max_aspect_ratio, requires_exterior_window, requires_egress, ventilation_type, requires_door, requires_closet, area_rules_json 
+            FROM EntitySpecs 
+            WHERE entity_type=?
         ''', (entity_type,))
         row = cursor.fetchone()
         
@@ -33,8 +32,7 @@ class EntityConstraintEngine:
             conn.close()
             return {"status": "no_data", "message": f"Entity '{entity_type}' not found."}
             
-        (version, min_area, min_side, max_side, habitable,
-         min_aspect, max_aspect, req_window, req_egress, vent_type, req_door, req_closet) = row
+        (min_area, min_side, max_side, habitable, min_aspect, max_aspect, req_window, req_egress, vent_type, req_door, req_closet, area_rules_json) = row
          
         size_rules = {
             "min_area_ft2": min_area,
@@ -60,15 +58,16 @@ class EntityConstraintEngine:
         # 2. Get relational rules if requested
         relational_rules = []
         if include_relations:
-            cursor.execute('''
-                SELECT entity_a, entity_b, relation, min_shared_wall_ft, max_dist_ft, description 
-                FROM RelationalRules 
-                WHERE entity_a=? OR entity_b=?
-            ''', (entity_type, entity_type))
+            # Note: We query the specific adjacency table for this entity
+            cursor.execute(f'''
+                SELECT target_entity, relation, min_shared_wall_ft, max_dist_ft, description 
+                FROM Adjacency_{entity_type}
+            ''')
             rel_rows = cursor.fetchall()
             
-            for a, b, relation, min_wall, max_dist, description in rel_rows:
-                rule = {"a": a, "b": b, "relation": relation}
+            for target_entity, relation, min_wall, max_dist, description in rel_rows:
+                # We format it to a/b so it looks identical to the old schema downstream
+                rule = {"a": entity_type, "b": target_entity, "relation": relation}
                 if min_wall is not None:
                     rule["min_shared_wall_ft"] = min_wall
                 if max_dist is not None:
@@ -79,55 +78,20 @@ class EntityConstraintEngine:
                 
         conn.close()
         
+        
+        import json
+        try:
+            area_rules = json.loads(area_rules_json) if area_rules_json else []
+        except json.JSONDecodeError:
+            area_rules = []
+            
         return {
             "entity_type": entity_type,
             "size_rules": size_rules,
             "feature_rules": feature_rules,
             "relational_rules": relational_rules,
-            "version": version
+            "area_rules": area_rules
         }
-        
-    def get_bulk_relational_rules(self, entities: list) -> list:
-        """
-        Retrieves all relational rules where at least one entity is in the provided list.
-        Executes highly efficiently via SQL IN clauses (O(log N) lookup if indexed).
-        """
-        if not entities:
-            return []
-            
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        
-        placeholders = ','.join('?' * len(entities))
-        query = f'''
-            SELECT entity_a, entity_b, relation, min_shared_wall_ft, max_dist_ft, description 
-            FROM RelationalRules 
-            WHERE entity_a IN ({placeholders}) OR entity_b IN ({placeholders})
-        '''
-        
-        cursor.execute(query, entities + entities)
-        rel_rows = cursor.fetchall()
-        
-        relational_rules = []
-        seen_adj = set()
-        
-        for a, b, relation, min_wall, max_dist, description in rel_rows:
-            # Deduplicate just in case
-            key = tuple(sorted([a, b]) + [relation])
-            if key not in seen_adj:
-                seen_adj.add(key)
-                
-                rule = {"a": a, "b": b, "relation": relation}
-                if min_wall is not None:
-                    rule["min_shared_wall_ft"] = min_wall
-                if max_dist is not None:
-                    rule["max_dist_ft"] = max_dist
-                if description is not None:
-                    rule["description"] = description
-                relational_rules.append(rule)
-                
-        conn.close()
-        return relational_rules
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

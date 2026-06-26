@@ -133,3 +133,17 @@ Because the entire system is DB-driven, new constraints can be added *without to
 *   **Adding a new room type:** Simply insert a new row into `EntitySpecs`. The agent will automatically query it and add it to the final JSON.
 *   **Adding a new safety code:** Insert a new column into `EntitySpecs`. The verifier can choose to enforce it when ready.
 *   **Adding a new zone rule:** Insert a row into `ZoneSpecificRules` for the targeted zone and rule key (e.g. `max_far: 3.0`). The Constraint Agent will dynamically ingest it and append it to the JSON when that zone is detected.
+
+---
+
+## 8. Natural Language User Constraints
+
+The architecture features a powerful LLM Parser (`src/llm_parser.py`) integrated via the Google Gemini API. It can interpret unstructured natural language requests (e.g. *"I want 3 bedrooms of 100sq ft"*) and automatically map them to strict JSON constraints.
+
+**Key capabilities:**
+- Extracts exactly which rooms the user asked for and dynamically adjusts the `required_rooms` baseline.
+- Converts conversational area and length constraints into strict mathematical ranges (`±5 sqft`, `±0.5 ft`).
+- Handles novel global constraints (e.g. *"max height is 120ft"*) and cleanly merges them without breaking schema.
+- Defaults all user-provided rules to `"hard"` constraints unless they specify `"soft"`.
+
+To enable this feature, simply place a `user_constraints.txt` file in the `src` directory, export your Gemini API key (`export GEMINI_API_KEY="..."`), and run `constraint_agent.py`.

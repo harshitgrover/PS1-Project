@@ -104,119 +104,150 @@ class ConstraintAgent:
         Optionally applies overrides (e.g., from user preferences via Planner Agent).
         Stores the final JSON in the database and returns its hash ID.
         """
+        def assign_level(k):
+            return self.DEFAULT_CONSTRAINT_LEVELS.get(k, "hard")
+            
         conn = self._get_connection()
         cursor = conn.cursor()
         
-        # 1. Fetch Exterior rules for jurisdiction
-        cursor.execute('''
-            SELECT schema_version, source, status, tolerance_ft,
-                   front_setback_ft, rear_setback_ft, side_setback_ft,
-                   min_house_width_ft, min_house_depth_ft, door_corner_margin_ft,
-                   max_lot_coverage_fraction, min_area_fraction_of_max, tree_protection_zone_json
-            FROM Jurisdictions WHERE name=?
-        ''', (jurisdiction_name,))
-        
-        row = cursor.fetchone()
-        
-        if not row:
-            # If jurisdiction is missing, fail loudly per schema ("no_data")
-            conn.close()
-            return {
-                "jurisdiction": jurisdiction_name,
-                "status": "no_data",
-                "message": f"Jurisdiction '{jurisdiction_name}' not found in database."
-            }
-            
-        (schema_version, source, status, tolerance_ft, 
-         front_sb, rear_sb, side_sb, min_w, min_d, door_m, 
-         max_lot, min_area_frac, tree_json) = row
-         
-        tree_zone = json.loads(tree_json) if tree_json else {"type": "polygon", "coordinates": []}
+        # 1. Base Exterior defaults (Jurisdictions table removed)
+        source = "IRC R304/R305"
+        status = "loaded"
+        tolerance_ft = 1e-6
         
         exterior = {
-            "front_setback_ft": front_sb,
-            "rear_setback_ft": rear_sb,
-            "side_setback_ft": side_sb,
-            "min_house_width_ft": min_w,
-            "min_house_depth_ft": min_d,
-            "door_corner_margin_ft": door_m,
-            "max_lot_coverage_fraction": max_lot,
-            "min_area_fraction_of_max": min_area_frac,
-            "tree_protection_zone": tree_zone
+            "front_setback_ft": None,
+            "rear_setback_ft": None,
+            "side_setback_ft": None,
+            "min_house_width_ft": 20.0,
+            "min_house_depth_ft": 20.0,
+            "door_corner_margin_ft": 2.0,
+            "max_lot_coverage_fraction": None,
+            "min_area_fraction_of_max": 0.85,
+            "tree_protection_zone": {"type": "polygon", "coordinates": []}
         }
         
         # 2. Fetch Interior rules ONLY for required entities
-        # required_rooms usually comes from Planner Agent, but we define a baseline here
-        required_rooms = { "living": 1, "kitchen": 1, "corridor": 1, "bedroom": 3, "bathroom": 2, "balcony": 1 }
+        # Baseline minimums required for a valid layout
+        required_rooms = { "bathroom": 2, "bedroom": 2, "living": 1, "kitchen": 1 }
+        
+        # 2.1 Parse user constraints via LLM if provided
+        room_overrides = {}
+        user_global_overrides = {}
+        user_constraint_levels = {}
+        user_descriptions = {}
+        
+        user_constraints_file = os.path.join(os.path.dirname(__file__), "user_constraints.txt")
+        if os.path.exists(user_constraints_file):
+            with open(user_constraints_file, "r") as f:
+                user_text = f.read().strip()
+            
+            if user_text:
+                try:
+                    from llm_parser import parse_user_constraints
+                    parsed = parse_user_constraints(user_text)
+                    if "required_rooms" in parsed and isinstance(parsed["required_rooms"], dict):
+                        for room, count in parsed["required_rooms"].items():
+                            required_rooms[room] = count
+                    if "room_overrides" in parsed and isinstance(parsed["room_overrides"], dict):
+                        room_overrides = parsed["room_overrides"]
+                    if "global_overrides" in parsed and isinstance(parsed["global_overrides"], dict):
+                        user_global_overrides = parsed["global_overrides"]
+                    if "user_constraint_levels" in parsed and isinstance(parsed["user_constraint_levels"], dict):
+                        user_constraint_levels = parsed["user_constraint_levels"]
+                    if "user_descriptions" in parsed and isinstance(parsed["user_descriptions"], dict):
+                        user_descriptions = parsed["user_descriptions"]
+                except Exception as e:
+                    print(f"Failed to process user_constraints.txt: {e}")
+        
+        # Remove any entities that were explicitly set to 0 by the user
+        required_rooms = {k: v for k, v in required_rooms.items() if v > 0}
         
         room_specs = {}
         descriptions = {}
+        adjacency_rules = []
+        area_rules_list = []
+        seen_adj = set()
         entities = list(required_rooms.keys())
         
         for ent in entities:
-            ent_rules = self.entity_engine.get_entity_rules(ent, include_relations=False)
+            # We now fetch relations specifically from Adjacency_{ent} per entity
+            ent_rules = self.entity_engine.get_entity_rules(ent, include_relations=True)
             if ent_rules.get("status") != "no_data":
                 specs = dict(ent_rules["size_rules"])
                 if "feature_rules" in ent_rules:
                     specs.update(ent_rules["feature_rules"])
+                    
+                # Apply specific user overrides for this room from the LLM
+                if ent in room_overrides:
+                    specs.update(room_overrides[ent])
+                    
                 room_specs[ent] = specs
                 
-        # 2b. Fetch relational rules in ONE bulk query using the indexes
-        raw_adjacency_rules = self.entity_engine.get_bulk_relational_rules(entities)
-        adjacency_rules = []
-        
-        for adj in raw_adjacency_rules:
-            if "description" in adj:
-                desc = adj.pop("description")
-                desc_key = f"{adj['a']}_{adj['relation']}_{adj['b']}"
-                descriptions[desc_key] = desc
-            adjacency_rules.append(adj)
+                # Add relational rules locally
+                for adj in ent_rules["relational_rules"]:
+                    # Only include rule if BOTH entities are actually required in this layout
+                    if adj["a"] in entities and adj["b"] in entities:
+                        key = tuple(sorted([adj["a"], adj["b"]]) + [adj["relation"]])
+                        if key not in seen_adj:
+                            seen_adj.add(key)
+                            
+                            adj_copy = dict(adj)
+                            desc_key = f"{adj['a']}_{adj['relation']}_{adj['b']}"
+                            adj_copy["level"] = assign_level(desc_key)
+                            adjacency_rules.append(adj_copy)
                         
-        # Get area rules
-        cursor.execute("SELECT rule, description FROM AreaRules")
-        area_rules = []
-        for rule, desc in cursor.fetchall():
-            area_rules.append({"rule": rule})
-            if desc:
-                descriptions[rule] = desc
+                # Add area rules locally
+                for a_rule in ent_rules.get("area_rules", []):
+                    rule_copy = dict(a_rule)
+                    rule_copy["level"] = assign_level(rule_copy["rule"])
+                    area_rules_list.append(rule_copy)
                 
-        # Default interior constraints (these could also be stored in DB per jurisdiction)
+        # Default interior constraints
         interior = {
             "required_rooms": required_rooms,
             "room_specs": room_specs,
             "adjacency_rules": adjacency_rules,
-            "area_rules": area_rules,
+            "area_rules": area_rules_list,
             "corridor_max_fraction_of_usable": 0.15,
             "coverage_tol_fraction": 0.05
         }
         
+        # Inject user global overrides into interior
+        if user_global_overrides:
+            interior.update(user_global_overrides)
+        
         # 2.5 Apply Zone Specific Rules
         if zone:
-            cursor.execute('''
-                SELECT rule_key, rule_value, description 
-                FROM ZoneSpecificRules 
-                WHERE jurisdiction=? AND zone=?
-            ''', (jurisdiction_name, zone))
-            zone_overrides = cursor.fetchall()
+            # Sanitize jurisdiction name for the table lookup (e.g. "Seattle, WA" -> "Seattle_WA")
+            loc = jurisdiction_name.replace(", ", "_").replace(" ", "_")
+            try:
+                cursor.execute(f'''
+                    SELECT rule_key, rule_value, description 
+                    FROM ZoneRules_{loc} 
+                    WHERE zone=?
+                ''', (zone,))
+                for row in cursor.fetchall():
+                    key, val_str, desc = row[0], row[1], row[2]
+                    try:
+                        val = float(val_str)
+                    except:
+                        val = val_str
+                        
+                    if key in exterior:
+                        exterior[key] = val
+                    else:
+                        interior[key] = val
+                        
+                    if desc:
+                        descriptions[key] = desc
+            except sqlite3.OperationalError:
+                pass
+                
+        # Inject user descriptions
+        if user_descriptions:
+            descriptions.update(user_descriptions)
             
-            for r_key, r_value, desc in zone_overrides:
-                # Try parsing value as float
-                try:
-                    val = float(r_value)
-                except ValueError:
-                    val = r_value
-                    
-                if r_key in exterior:
-                    exterior[r_key] = val
-                else:
-                    # Append all other rules (including novel ones) to the interior dictionary
-                    interior[r_key] = val
-                    
-                if desc:
-                    descriptions[r_key] = desc
-                    
-        conn.close()
-        
         # 3. Apply Overrides (if any)
         if overrides:
             if 'exterior' in overrides:
@@ -233,9 +264,6 @@ class ConstraintAgent:
         # Ensure constraint_levels are assigned
         constraint_levels = {}
         # We assign levels based on all defined descriptions and keys in exterior/interior/room_specs
-        
-        def assign_level(k):
-            return self.DEFAULT_CONSTRAINT_LEVELS.get(k, "hard")
             
         for key in descriptions.keys():
             constraint_levels[key] = assign_level(key)
@@ -246,10 +274,24 @@ class ConstraintAgent:
         for room, specs in room_specs.items():
             for spec_key in specs.keys():
                 constraint_levels[spec_key] = assign_level(spec_key)
+                
+        # Now overlay the explicitly requested levels from the user
+        if user_constraint_levels:
+            constraint_levels.update(user_constraint_levels)
+
+        # SAFETY CHECK: If the LLM forgot to put an overridden key into user_constraint_levels, force it to 'hard'
+        if room_overrides:
+            for ent, overrides in room_overrides.items():
+                for k in overrides.keys():
+                    if k not in constraint_levels:
+                        constraint_levels[k] = "hard"
+        if user_global_overrides:
+            for k in user_global_overrides.keys():
+                if k not in constraint_levels:
+                    constraint_levels[k] = "hard"
 
         final_schema = {
             "jurisdiction": jurisdiction_name,
-            "schema_version": schema_version,
             "source": source,
             "status": status,
             "tolerance_ft": tolerance_ft,
@@ -258,6 +300,26 @@ class ConstraintAgent:
             "descriptions": descriptions,
             "constraint_levels": constraint_levels
         }
+        
+        # Filter descriptions and constraint_levels to ONLY include keys present in the final_schema
+        def get_all_keys(obj):
+            keys = set()
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    keys.add(k)
+                    keys.update(get_all_keys(v))
+            elif isinstance(obj, list):
+                for item in obj:
+                    keys.update(get_all_keys(item))
+            return keys
+            
+        active_keys = get_all_keys(final_schema)
+        
+        filtered_levels = {k: v for k, v in constraint_levels.items() if k in active_keys}
+        filtered_descriptions = {k: v for k, v in descriptions.items() if k in active_keys}
+        
+        final_schema["constraint_levels"] = filtered_levels
+        final_schema["descriptions"] = filtered_descriptions
         
         # 5. Hash, save to DB, and return ID
         json_str = json.dumps(final_schema, sort_keys=True)
