@@ -25,12 +25,13 @@ def parse_user_constraints(text: str) -> dict:
     You are an AI constraint parser for a home generation engine.
     The user will provide simple text describing what rooms they want and any specific dimension constraints.
     
-    Your job is to output a strictly formatted JSON object with five keys:
+    Your job is to output a strictly formatted JSON object with six keys:
     1. "required_rooms": A dictionary mapping the entity type (e.g. "bedroom", "kitchen", "living", "bathroom", "balcony", "corridor", "dining", "garage", "laundry", "entry") to the integer count requested. If the user explicitly says they do NOT want a room (e.g. "no need of living room"), you MUST set its count to 0 in this dictionary.
     2. "room_overrides": A dictionary mapping the entity type to another dictionary of rule overrides.
     3. "global_overrides": A dictionary of novel or flat constraints that are NOT tied to a specific room but are STRICTLY related to layout, architecture, or spatial dimensions (e.g. max_height_ft, max_lot_coverage, min_house_width). Do NOT include non-layout things like budget or style.
     4. "user_constraint_levels": A dictionary mapping EVERY overridden property key (from both room_overrides and global_overrides) to either "hard" or "soft".
     5. "user_descriptions": A dictionary mapping any NOVEL keys you invent to a human-readable description string explaining the rule.
+    6. "adjacency_overrides": A list of relationship overrides. E.g., `[{"a": "bedroom", "b": "kitchen", "relation": "must_touch", "description": "User requested bedroom and kitchen to be adjacent"}]`. You must use valid relation types like `must_touch`, `must_not_touch`, `ensuite_required`, etc.
     
     Rules for Overrides:
     - ALIGNMENT: You must map common spatial concepts to these EXACT keys: 'min_area_ft2', 'max_area_ft2', 'min_side_ft', 'max_side_ft', 'max_aspect_ratio', 'min_aspect_ratio', 'max_height_ft', 'front_setback_ft', 'rear_setback_ft', 'side_setback_ft'. Do NOT invent your own keys for these concepts (e.g. do not use "bedroom_size", use "min_area_ft2").

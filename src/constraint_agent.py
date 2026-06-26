@@ -136,6 +136,7 @@ class ConstraintAgent:
         user_global_overrides = {}
         user_constraint_levels = {}
         user_descriptions = {}
+        user_adjacency_overrides = []
         
         user_constraints_file = os.path.join(os.path.dirname(__file__), "user_constraints.txt")
         if os.path.exists(user_constraints_file):
@@ -157,6 +158,8 @@ class ConstraintAgent:
                         user_constraint_levels = parsed["user_constraint_levels"]
                     if "user_descriptions" in parsed and isinstance(parsed["user_descriptions"], dict):
                         user_descriptions = parsed["user_descriptions"]
+                    if "adjacency_overrides" in parsed and isinstance(parsed["adjacency_overrides"], list):
+                        user_adjacency_overrides = parsed["adjacency_overrides"]
                 except Exception as e:
                     print(f"Failed to process user_constraints.txt: {e}")
         
@@ -169,6 +172,11 @@ class ConstraintAgent:
         area_rules_list = []
         seen_adj = set()
         entities = list(required_rooms.keys())
+        
+        overridden_pairs = set()
+        for u_adj in user_adjacency_overrides:
+            if "a" in u_adj and "b" in u_adj:
+                overridden_pairs.add(tuple(sorted([u_adj["a"], u_adj["b"]])))
         
         for ent in entities:
             # We now fetch relations specifically from Adjacency_{ent} per entity
@@ -188,6 +196,10 @@ class ConstraintAgent:
                 for adj in ent_rules["relational_rules"]:
                     # Only include rule if BOTH entities are actually required in this layout
                     if adj["a"] in entities and adj["b"] in entities:
+                        pair = tuple(sorted([adj["a"], adj["b"]]))
+                        if pair in overridden_pairs:
+                            continue # Skip the DB rule because the user overrode it
+                            
                         key = tuple(sorted([adj["a"], adj["b"]]) + [adj["relation"]])
                         if key not in seen_adj:
                             seen_adj.add(key)
@@ -196,12 +208,21 @@ class ConstraintAgent:
                             desc_key = f"{adj['a']}_{adj['relation']}_{adj['b']}"
                             adj_copy["level"] = assign_level(desc_key)
                             adjacency_rules.append(adj_copy)
-                        
+                            
                 # Add area rules locally
                 for a_rule in ent_rules.get("area_rules", []):
                     rule_copy = dict(a_rule)
                     rule_copy["level"] = assign_level(rule_copy["rule"])
                     area_rules_list.append(rule_copy)
+                    
+        # Now append all user adjacency overrides to adjacency_rules
+        for u_adj in user_adjacency_overrides:
+             if u_adj.get("a") in entities and u_adj.get("b") in entities:
+                  desc_key = f"{u_adj['a']}_{u_adj['relation']}_{u_adj['b']}"
+                  u_adj["level"] = user_constraint_levels.get(desc_key, "hard")
+                  if "description" not in u_adj:
+                       u_adj["description"] = user_descriptions.get(desc_key, f"User rule: {desc_key}")
+                  adjacency_rules.append(u_adj)
                 
         # Default interior constraints
         interior = {

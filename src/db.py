@@ -132,7 +132,9 @@ def seed_data(db_path=DEFAULT_DB_PATH):
         ],
         "corridor": [
             ("bedroom", "must_touch", 3.0, None, "Bedroom must connect to a corridor sharing at least 3ft of wall."),
-            ("bathroom", "must_touch", 2.5, None, "Bathroom must connect to a corridor sharing at least 2.5ft of wall.")
+            ("bathroom", "must_touch", 2.5, None, "Bathroom must connect to a corridor sharing at least 2.5ft of wall."),
+            ("living", "must_touch", 3.0, None, "Living room must connect to a corridor sharing at least 3ft of wall."),
+            ("kitchen", "must_touch", 3.0, None, "Kitchen must connect to a corridor sharing at least 3ft of wall.")
         ],
         "entry": [
             ("living", "near", None, 2.0, "Living room should be near the entry within 2ft distance."),

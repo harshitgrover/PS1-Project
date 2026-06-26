@@ -1,0 +1,191 @@
+{
+  "constraint_levels": {
+    "building_area_sqft": "hard",
+    "building_file": "hard",
+    "door_corner_margin_ft": "hard",
+    "front_setback_ft": "hard",
+    "geometry_file": "hard",
+    "habitable": "hard",
+    "kitchen_habitable": "hard",
+    "max_aspect_ratio": "hard",
+    "max_far": "hard",
+    "max_height_ft": "hard",
+    "max_impervious_surface_pct": "hard",
+    "max_lot_coverage_fraction": "hard",
+    "max_vehicle_parking_spaces_per_unit": "hard",
+    "min_area_fraction_of_max": "hard",
+    "min_area_ft2": "hard",
+    "min_aspect_ratio": "hard",
+    "min_bicycle_parking_spaces_per_unit": "hard",
+    "min_house_depth_ft": "hard",
+    "min_house_width_ft": "hard",
+    "min_side_ft": "hard",
+    "parcel_area_sqft": "hard",
+    "rear_setback_ft": "hard",
+    "requires_closet": "hard",
+    "requires_door": "hard",
+    "requires_egress": "soft",
+    "requires_exterior_window": "soft",
+    "side_setback_ft": "hard",
+    "tree_protection_zone": "hard",
+    "ventilation_type": "soft"
+  },
+  "descriptions": {
+    "building_area_sqft": "Total calculated building area in square feet.",
+    "building_file": "File path to the existing building geometry (if any).",
+    "door_corner_margin_ft": "Minimum distance a door must be placed from an internal corner.",
+    "front_setback_ft": "Minimum front property line setback in feet.",
+    "geometry_file": "File path to the raw lot geometry.",
+    "kitchen_habitable": "Requirement that the kitchen space is designated as a habitable living area",
+    "max_far": "Maximum Floor Area Ratio (FAR) allowed before purchasing bonus density.",
+    "max_height_ft": "Maximum allowed building height in feet.",
+    "max_impervious_surface_pct": "Maximum allowed percentage of impervious surfaces on the lot.",
+    "max_lot_coverage_fraction": "Maximum allowed fraction of the lot that can be covered by the building footprint.",
+    "max_vehicle_parking_spaces_per_unit": "Maximum vehicle parking spaces per unit (TMP cap).",
+    "min_area_fraction_of_max": "Minimum percentage of the maximum allowed footprint that must be built.",
+    "min_bicycle_parking_spaces_per_unit": "Minimum bicycle parking spaces per unit (Transit-oriented design).",
+    "min_house_depth_ft": "Minimum allowed depth of the main building structure.",
+    "min_house_width_ft": "Minimum allowed width of the main building structure.",
+    "parcel_area_sqft": "Total area of the property parcel in square feet.",
+    "rear_setback_ft": "Minimum rear property line setback in feet.",
+    "side_setback_ft": "Minimum side property line setback in feet.",
+    "tree_protection_zone": "GeoJSON boundaries for protected trees that cannot be built over."
+  },
+  "exterior": {
+    "building_area_sqft": 1113207.6441514671,
+    "building_file": "outputs/one microsoft way_ redmond_ usa_buildings.json",
+    "door_corner_margin_ft": 2.0,
+    "front_setback_ft": 0,
+    "geometry_file": "outputs/one microsoft way_ redmond_ usa_geometry.json",
+    "max_far": 3.0,
+    "max_height_ft": 150,
+    "max_impervious_surface_pct": 80,
+    "max_lot_coverage_fraction": null,
+    "min_area_fraction_of_max": 0.85,
+    "min_house_depth_ft": 20.0,
+    "min_house_width_ft": 20.0,
+    "parcel_area_sqft": 4289358.725313804,
+    "rear_setback_ft": 0,
+    "side_setback_ft": 0,
+    "tree_protection_zone": {
+      "coordinates": [],
+      "type": "polygon"
+    }
+  },
+  "interior": {
+    "adjacency_rules": [
+      {
+        "a": "bedroom",
+        "b": "corridor",
+        "description": "Bedroom must connect to a corridor sharing at least 3ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 3.0,
+        "relation": "must_touch"
+      },
+      {
+        "a": "living",
+        "b": "kitchen",
+        "description": "Kitchen must connect to the living room sharing at least 2.5ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 2.5,
+        "relation": "must_touch"
+      },
+      {
+        "a": "corridor",
+        "b": "living",
+        "description": "Living room must connect to a corridor sharing at least 3ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 3.0,
+        "relation": "must_touch"
+      },
+      {
+        "a": "corridor",
+        "b": "kitchen",
+        "description": "Kitchen must connect to a corridor sharing at least 3ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 3.0,
+        "relation": "must_touch"
+      },
+      {
+        "a": "bedroom",
+        "b": "kitchen",
+        "description": "User requested bedroom and kitchen to be adjacent",
+        "level": "hard",
+        "relation": "must_touch"
+      }
+    ],
+    "area_rules": [
+      {
+        "description": "Living room must be larger than each individual bedroom.",
+        "level": "hard",
+        "rule": "living_gt_each_bedroom"
+      }
+    ],
+    "corridor_max_fraction_of_usable": 0.15,
+    "coverage_tol_fraction": 0.05,
+    "kitchen_habitable": true,
+    "max_far": 3.0,
+    "max_vehicle_parking_spaces_per_unit": 1.5,
+    "min_bicycle_parking_spaces_per_unit": 1.0,
+    "required_rooms": {
+      "bedroom": 5,
+      "corridor": 1,
+      "kitchen": 2,
+      "living": 1
+    },
+    "room_specs": {
+      "bedroom": {
+        "habitable": true,
+        "max_aspect_ratio": 1.8,
+        "min_area_ft2": 70.0,
+        "min_aspect_ratio": 1.0,
+        "min_side_ft": 7.0,
+        "requires_closet": true,
+        "requires_door": true,
+        "requires_egress": true,
+        "requires_exterior_window": true,
+        "ventilation_type": "natural"
+      },
+      "corridor": {
+        "habitable": false,
+        "max_aspect_ratio": 10.0,
+        "min_area_ft2": 16.0,
+        "min_aspect_ratio": 3.0,
+        "min_side_ft": 4.0,
+        "requires_closet": false,
+        "requires_door": false,
+        "requires_egress": false,
+        "requires_exterior_window": false,
+        "ventilation_type": "none"
+      },
+      "kitchen": {
+        "habitable": true,
+        "max_aspect_ratio": 2.0,
+        "min_area_ft2": 500,
+        "min_aspect_ratio": 1.0,
+        "min_side_ft": 7.0,
+        "requires_closet": false,
+        "requires_door": true,
+        "requires_egress": false,
+        "requires_exterior_window": false,
+        "ventilation_type": "mechanical_or_natural"
+      },
+      "living": {
+        "habitable": true,
+        "max_aspect_ratio": 2.0,
+        "min_area_ft2": 70.0,
+        "min_aspect_ratio": 1.2,
+        "min_side_ft": 7.0,
+        "requires_closet": false,
+        "requires_door": true,
+        "requires_egress": false,
+        "requires_exterior_window": true,
+        "ventilation_type": "natural"
+      }
+    }
+  },
+  "jurisdiction": "Redmond, WA",
+  "source": "IRC R304/R305",
+  "status": "loaded",
+  "tolerance_ft": 1e-06
+}

@@ -1,11 +1,14 @@
 {
   "constraint_levels": {
+    "adjacent_to_kitchen": "hard",
     "building_area_sqft": "hard",
     "building_file": "hard",
     "door_corner_margin_ft": "hard",
     "front_setback_ft": "hard",
     "geometry_file": "hard",
     "habitable": "hard",
+    "is_habitable": "hard",
+    "kitchen_adjacency_rule": "hard",
     "max_aspect_ratio": "hard",
     "max_far": "hard",
     "max_height_ft": "hard",
@@ -30,11 +33,14 @@
     "ventilation_type": "soft"
   },
   "descriptions": {
+    "adjacent_to_kitchen": "Specifies that the bedroom must share a boundary with the kitchen area.",
     "building_area_sqft": "Total calculated building area in square feet.",
     "building_file": "File path to the existing building geometry (if any).",
     "door_corner_margin_ft": "Minimum distance a door must be placed from an internal corner.",
     "front_setback_ft": "Minimum front property line setback in feet.",
     "geometry_file": "File path to the raw lot geometry.",
+    "is_habitable": "Specifies that the kitchen space must meet residential habitability standards.",
+    "kitchen_adjacency_rule": "Enforces spatial proximity constraints between kitchen units and bedroom units.",
     "max_far": "Maximum Floor Area Ratio (FAR) allowed before purchasing bonus density.",
     "max_height_ft": "Maximum allowed building height in feet.",
     "max_impervious_surface_pct": "Maximum allowed percentage of impervious surfaces on the lot.",
@@ -105,6 +111,7 @@
     ],
     "corridor_max_fraction_of_usable": 0.15,
     "coverage_tol_fraction": 0.05,
+    "kitchen_adjacency_rule": true,
     "max_far": 3.0,
     "max_vehicle_parking_spaces_per_unit": 1.5,
     "min_bicycle_parking_spaces_per_unit": 1.0,
@@ -116,6 +123,7 @@
     },
     "room_specs": {
       "bedroom": {
+        "adjacent_to_kitchen": true,
         "habitable": true,
         "max_aspect_ratio": 1.8,
         "min_area_ft2": 70.0,
@@ -141,6 +149,7 @@
       },
       "kitchen": {
         "habitable": true,
+        "is_habitable": true,
         "max_aspect_ratio": 2.0,
         "min_area_ft2": 500,
         "min_aspect_ratio": 1.0,
