@@ -234,9 +234,14 @@ class ConstraintAgent:
             "coverage_tol_fraction": 0.05
         }
         
-        # Inject user global overrides into interior
+        # Inject user global overrides (route them cleanly between exterior and interior)
         if user_global_overrides:
-            interior.update(user_global_overrides)
+            for k, v in user_global_overrides.items():
+                if k in interior and k not in exterior:
+                    interior[k] = v
+                else:
+                    # Known exterior keys or novel global constraints default to exterior
+                    exterior[k] = v
         
         # 2.5 Apply Zone Specific Rules
         if zone:
