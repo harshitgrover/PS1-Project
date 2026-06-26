@@ -60,6 +60,8 @@ def init_db(db_path=DEFAULT_DB_PATH):
             description TEXT
         )
     ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_entity_a ON RelationalRules(entity_a)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_entity_b ON RelationalRules(entity_b)')
 
     # Table for specific area rules
     cursor.execute('''
@@ -132,7 +134,7 @@ def seed_data(db_path=DEFAULT_DB_PATH):
         INSERT OR REPLACE INTO EntitySpecs (entity_type, version, min_area_ft2, min_side_ft, max_side_ft, habitable, min_aspect_ratio, max_aspect_ratio, requires_exterior_window, requires_egress, ventilation_type, requires_door, requires_closet)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', entities)
-
+    
     # 3. Relational Rules (versioned v1)
     # Adjacencies, distances, avoidances
     relations = [

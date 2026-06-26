@@ -12,9 +12,9 @@ class EntityConstraintEngine:
     def _get_connection(self):
         return sqlite3.connect(self.db_path)
 
-    def get_entity_rules(self, entity_type: str, rule_request: str = "size_and_adjacency") -> dict:
+    def get_entity_rules(self, entity_type: str, include_relations: bool = True) -> dict:
         """
-        Retrieves the size and adjacency rules for a specific entity.
+        Retrieves the size rules (and optionally adjacency rules) for a specific entity.
         Returns a dictionary with the entity's constraints.
         """
         conn = self._get_connection()
@@ -57,26 +57,26 @@ class EntityConstraintEngine:
         size_rules = {k: v for k, v in size_rules.items() if v is not None}
         feature_rules = {k: v for k, v in feature_rules.items() if v is not None}
         
-        # 2. Get relational rules where this entity is 'a' or 'b'
-        # To match the schema, we just return the array of rules for this entity.
-        cursor.execute('''
-            SELECT entity_a, entity_b, relation, min_shared_wall_ft, max_dist_ft, description 
-            FROM RelationalRules 
-            WHERE entity_a=? OR entity_b=?
-        ''', (entity_type, entity_type))
-        rel_rows = cursor.fetchall()
-        
+        # 2. Get relational rules if requested
         relational_rules = []
-        for a, b, relation, min_wall, max_dist, description in rel_rows:
-            rule = {"a": a, "b": b, "relation": relation}
-            if min_wall is not None:
-                rule["min_shared_wall_ft"] = min_wall
-            if max_dist is not None:
-                rule["max_dist_ft"] = max_dist
-            if description is not None:
-                rule["description"] = description
-            relational_rules.append(rule)
+        if include_relations:
+            cursor.execute('''
+                SELECT entity_a, entity_b, relation, min_shared_wall_ft, max_dist_ft, description 
+                FROM RelationalRules 
+                WHERE entity_a=? OR entity_b=?
+            ''', (entity_type, entity_type))
+            rel_rows = cursor.fetchall()
             
+            for a, b, relation, min_wall, max_dist, description in rel_rows:
+                rule = {"a": a, "b": b, "relation": relation}
+                if min_wall is not None:
+                    rule["min_shared_wall_ft"] = min_wall
+                if max_dist is not None:
+                    rule["max_dist_ft"] = max_dist
+                if description is not None:
+                    rule["description"] = description
+                relational_rules.append(rule)
+                
         conn.close()
         
         return {
@@ -86,6 +86,48 @@ class EntityConstraintEngine:
             "relational_rules": relational_rules,
             "version": version
         }
+        
+    def get_bulk_relational_rules(self, entities: list) -> list:
+        """
+        Retrieves all relational rules where at least one entity is in the provided list.
+        Executes highly efficiently via SQL IN clauses (O(log N) lookup if indexed).
+        """
+        if not entities:
+            return []
+            
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        
+        placeholders = ','.join('?' * len(entities))
+        query = f'''
+            SELECT entity_a, entity_b, relation, min_shared_wall_ft, max_dist_ft, description 
+            FROM RelationalRules 
+            WHERE entity_a IN ({placeholders}) OR entity_b IN ({placeholders})
+        '''
+        
+        cursor.execute(query, entities + entities)
+        rel_rows = cursor.fetchall()
+        
+        relational_rules = []
+        seen_adj = set()
+        
+        for a, b, relation, min_wall, max_dist, description in rel_rows:
+            # Deduplicate just in case
+            key = tuple(sorted([a, b]) + [relation])
+            if key not in seen_adj:
+                seen_adj.add(key)
+                
+                rule = {"a": a, "b": b, "relation": relation}
+                if min_wall is not None:
+                    rule["min_shared_wall_ft"] = min_wall
+                if max_dist is not None:
+                    rule["max_dist_ft"] = max_dist
+                if description is not None:
+                    rule["description"] = description
+                relational_rules.append(rule)
+                
+        conn.close()
+        return relational_rules
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -145,39 +145,32 @@ class ConstraintAgent:
             "tree_protection_zone": tree_zone
         }
         
-        # 2. Fetch Interior rules
-        # First, query all entities available
-        cursor.execute("SELECT entity_type FROM EntitySpecs")
-        entities = [r[0] for r in cursor.fetchall()]
+        # 2. Fetch Interior rules ONLY for required entities
+        # required_rooms usually comes from Planner Agent, but we define a baseline here
+        required_rooms = { "living": 1, "kitchen": 1, "corridor": 1, "bedroom": 3, "bathroom": 2, "balcony": 1 }
         
         room_specs = {}
-        adjacency_rules = []
-        seen_adj = set()
         descriptions = {}
+        entities = list(required_rooms.keys())
         
         for ent in entities:
-            ent_rules = self.entity_engine.get_entity_rules(ent)
+            ent_rules = self.entity_engine.get_entity_rules(ent, include_relations=False)
             if ent_rules.get("status") != "no_data":
                 specs = dict(ent_rules["size_rules"])
                 if "feature_rules" in ent_rules:
                     specs.update(ent_rules["feature_rules"])
                 room_specs[ent] = specs
                 
-                # Add relational rules (avoiding duplicates)
-                for adj in ent_rules["relational_rules"]:
-                    # Create a unique key for the relation to deduplicate
-                    # Since order might matter or not, we sort a, b just for deduplication
-                    key = tuple(sorted([adj["a"], adj["b"]]) + [adj["relation"]])
-                    if key not in seen_adj:
-                        seen_adj.add(key)
-                        
-                        # Extract description to a separate mapping for the schema
-                        if "description" in adj:
-                            desc = adj.pop("description")
-                            desc_key = f"{adj['a']}_{adj['relation']}_{adj['b']}"
-                            descriptions[desc_key] = desc
-                            
-                        adjacency_rules.append(adj)
+        # 2b. Fetch relational rules in ONE bulk query using the indexes
+        raw_adjacency_rules = self.entity_engine.get_bulk_relational_rules(entities)
+        adjacency_rules = []
+        
+        for adj in raw_adjacency_rules:
+            if "description" in adj:
+                desc = adj.pop("description")
+                desc_key = f"{adj['a']}_{adj['relation']}_{adj['b']}"
+                descriptions[desc_key] = desc
+            adjacency_rules.append(adj)
                         
         # Get area rules
         cursor.execute("SELECT rule, description FROM AreaRules")
@@ -186,10 +179,10 @@ class ConstraintAgent:
             area_rules.append({"rule": rule})
             if desc:
                 descriptions[rule] = desc
+                
         # Default interior constraints (these could also be stored in DB per jurisdiction)
         interior = {
-            # required_rooms usually comes from Planner Agent, but we define a baseline here
-            "required_rooms": { "living": 1, "kitchen": 1, "corridor": 1, "bedroom": 3, "bathroom": 2, "balcony": 1 },
+            "required_rooms": required_rooms,
             "room_specs": room_specs,
             "adjacency_rules": adjacency_rules,
             "area_rules": area_rules,
