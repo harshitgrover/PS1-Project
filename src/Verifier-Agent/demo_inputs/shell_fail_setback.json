@@ -1,0 +1,24 @@
+{
+  "session_id": "test_session_2",
+  "stage": "shell",
+  "entities": [
+    {
+      "id": "exterior_shell",
+      "type": "shell",
+      "polygon": [[5.0, 20.0], [85.0, 20.0], [85.0, 78.0], [5.0, 78.0]]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "front_setback_ft",
+      "type": "boundary_containment",
+      "severity": "hard",
+      "params": {
+         "value": 15.0
+      }
+    }
+  ],
+  "envelope_polygon": [[0.0, 0.0], [0.0, 80.0], [80.0, 80.0], [80.0, 0.0]],
+  "total_lot_area_sqft": 6400.0,
+  "jurisdiction": "seattle"
+}
