@@ -1,0 +1,200 @@
+System Architecture & Design Specification: Verifier Agent
+Project: Agentic CAD / AI-Driven House Design Pipeline
+Module Owners: Devam & Harshit
+Document Status: Final Architecture Spec
+1. Executive Summary & Scope
+The Verifier Agent serves as the deterministic, stateless validation engine for the generative architectural pipeline. It acts as the mathematical "Discriminator" in a GAN-style system: it evaluates layouts proposed by upstream Generator Agents against a dynamic, centralized ruleset, returning a proven SAT (Satisfied) or UNSAT (Unsatisfied) result alongside precise diagnostic feedback.
+1.1. In-Scope Responsibilities
+Deterministic Validation: Check exterior shells and interior room layouts against hard and soft constraints (e.g., setbacks, lot coverage, room overlaps).
+Diagnostic Feedback: Translate raw mathematical violations into actionable, directional feedback (magnitude and direction of error).
+Tool Orchestration: Act as the programmatic wrapper for the external Z3 solver tool.
+1.2. Out-of-Scope (Anti-Patterns)
+Repair Generation: The Verifier strictly judges layouts. It does not compute optimal fixes or output corrected coordinates. Layout repair is the exclusive responsibility of the Generator (Agent A2).
+Optimization/Maximization: Finding the "maximal buildable envelope" or solving for optimal room packing belongs to the Site Plan and Floor Plan Generators.
+State & Session Management: The Verifier is entirely stateless. Orchestration, retry loop counting, and memory (Redis) are managed by the Agent Manager.
+2. System Architecture: The Four-Layer Model
+To maximize modularity, the Verifier Agent utilizes a strictly decoupled, four-layer architecture. This ensures that changes to external tools (like the Z3 solver) or upstream constraints do not break the core validation logic.
+Layer 1: Transport (FastAPI)
+Role: The HTTP protocol handler (POST /verify).
+Behavior: Acts purely as a communication pipe. It accepts incoming JSON, passes it to the Contract layer, and returns a 200 OK containing the VerificationResponse.
+Design Note: A layout that fails geometric validation (UNSAT) is still a successful 200 OK HTTP transaction. HTTP 4xx/5xx errors are reserved strictly for system failures or schema violations.
+Layer 2: Contract (Pydantic DTOs) & Ingestion Modularity
+Role: The absolute public API boundary (contracts.py).
+Behavior: Enforces strict typing for VerificationRequest, Constraint, GeometryEntity, and VerificationResponse.
+Layer 3: Dispatcher (Core Logic)
+Role: The routing and diagnostic engine (dispatcher.py).
+Behavior: Currently, the system assumes all constraints are evaluated via the Z3 tool (no Shapely/Z3 tagging split). The Dispatcher aggregates the constraints, fires them to the Z3 adapter, and processes the raw tool output into human-readable, directional feedback.
+Layer 4: Tool Clients (Adapter Pattern)
+Role: The external execution wrapper (z3_client.py).
+Behavior: Implements the Adapter Pattern to translate internal Pydantic models into the specific dictionaries/formats expected by the Z3 solver (verifier_tool.py).
+3. Ingestion Layer Modularity & Forward Compatibility
+A key requirement for this system is high modularity at the ingestion layer. The upstream Constraint Engine generates a "living ruleset" (ruleset.json) that will expand over time. The Verifier’s ingestion layer is designed to be highly resilient to these changes.
+3.1. Strict Schema Decoupling
+Because Layer 2 (Contract) uses Pydantic Data Transfer Objects (DTOs), the Verifier is isolated from upstream malformed data. If the Constraint Engine alters its output format unexpectedly, the request is rejected at the FastAPI door with a 422 Unprocessable Entity, protecting the core logic from runtime crashes.
+3.2. The Open-Closed Principle (OCP)
+The system is open for extension but closed for modification. As the Z3 tool takes on all verification duties, the Dispatcher does not need a hardcoded if/else block for every single constraint type. Instead, it passes the constraint objects directly to the Z3 client.
+3.3. Unknown Rule Fallback Protocol
+If the Constraint Engine passes a newly invented constraint that the underlying Z3 tool does not yet know how to solve, the system handles it gracefully based on the ingested severity tag:
+If severity == "soft": The Dispatcher logs a warning, ignores the unprocessable constraint, and allows verification to proceed.
+If severity == "hard": The Dispatcher halts, generating a system-level UNSAT violation ("System Error: Constraint type 'X' could not be evaluated"). This fail-loud mechanism prevents the pipeline from silently approving illegal layouts.
+4. Z3 Tool Integration & The Adapter Pattern
+The underlying Z3 tool (managed by Swara/Ojas) acts as the mathematical oracle. It requires specific payload structures (e.g., {"corners": [...], "door": [...]}) and a jurisdiction string.
+4.1. The Adapter Implementation (z3_client.py)
+Because our pipeline uses dynamically generated JSON rulesets rather than static city config files, z3_client.py adapts our data to Z3's expectations.
+Translation: Converts GeometryEntity polygons into Z3's expected coordinate arrays.
+Execution: Invokes the Z3 functions (e.g., vz.verify_site) via a direct Python import, avoiding HTTP overhead for tool calls.
+Future-Proofing: If the Z3 tool's signature changes, only z3_client.py requires updates. The Dispatcher and Transport layers remain entirely untouched.
+5. The "No-Leak" Rule & Diagnostic Feedback
+To prevent the Generator (Agent A1) from bypassing its own spatial reasoning, the Verifier adheres to a strict "No-Leak" feedback protocol. The Verifier must act like the Discriminator in a GAN: it provides a loss gradient, forcing the Generator to reason out the structural repair.
+Allowed (Direction & Magnitude): Identifying specific constraints and the amount of error.
+Example: "Exterior shell spills 12.3 sqft outside the buildable envelope at the northern boundary. Reduce extent inward."
+Forbidden (Coordinate Leaks): Providing exact corrected coordinates or scalar multipliers.
+Example: "Move house_top_y from 61 to 58" or "Multiply coordinates by 0.94".
+Implementation: The Dispatcher parses the raw output from the Z3 tool and formats it into the message field of the ViolationDetail schema, explicitly stripping any coordinate suggestions before returning the response.
+6. Distributed Systems Integrity (CAP Theorem)
+In the context of the CAP Theorem (Consistency, Availability, Partition Tolerance), the Verifier Agent is designed to sidestep traditional tradeoffs by being completely stateless.
+No Shared Memory: The Verifier does not read or write to Redis to fulfill a request. Every POST /verify contains the complete context (geometry + constraints) required to compute the answer.
+System Synergy: The Agent Manager is responsible for system-wide Consistency (CP)—managing the state machine, HITL (Human-in-the-Loop) pauses, and iteration limits via Redis. By offloading state, the Verifier Agent achieves maximum local Availability (AP), executing requests instantly and safely scaling horizontally if needed.
+7. Core Data Schemas (Public API Contract)
+These JSON schemas represent the exact interfaces enforced by the Pydantic ingestion layer.
+7.1. VerificationRequest
+JSON
+{
+  "session_id": "string",
+  "stage": "shell | room",
+  "entities": [
+    {
+      "id": "exterior_shell",
+      "type": "shell",
+      "polygon": [[5.0, 20.0], [75.0, 20.0], [75.0, 78.0], [5.0, 78.0]]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "front_setback_ft",
+      "type": "boundary_containment",
+      "stage": "shell",
+      "severity": "hard",
+      "params": {
+         "value": 15.0
+      }
+    }
+  ],
+  "envelope_polygon": [[0.0, 0.0], [0.0, 80.0], [80.0, 80.0], [80.0, 0.0]],
+  "total_lot_area_sqft": 6400.0,
+  "jurisdiction": "Redmond, WA"
+}
+
+7.2. VerificationResponse
+JSON
+{
+  "session_id": "string",
+  "result": "SAT | UNSAT",
+  "hard_violations": [
+    {
+      "constraint_id": "front_setback_ft",
+      "entity_id": "exterior_shell",
+      "severity": "hard",
+      "message": "Exterior shell breaches front setback by 2.5 ft. Shift footprint rearward.",
+      "current_value": 12.5,
+      "required_value": 15.0,
+      "delta": -2.5
+    }
+  ],
+  "soft_violations": []
+}
+
+(Note: An empty hard_violations array inherently means the layout is SAT.)
+8. Cross-Team Dependencies & Assumptions
+To successfully operate, the Verifier Agent assumes the following from adjacent modules:
+Agent Manager (Prem/Swara): Handles all iteration caps, state tracking, and routing of the final SAT/UNSAT signal. The Verifier does not track how many times a layout has failed.
+Constraint Engine (Harshit/Anshul): Provides fully hydrated constraint objects in the request payload, including severity (hard/soft) tags. The Verifier relies on the Engine to ensure constraint logic is sound.
+Generators (Site Plan / Floor Plan): Provide mathematically valid, closed, non-self-intersecting polygons in local Cartesian coordinates (feet).
+Z3 Tool (Swara/Ojas): Exposes verify_site and verify_interior as synchronous Python functions returning structured violation data. The tool handles its own internal floating-point tolerances.
+
+
+
+
+
+
+
+
+
+
+
+
+For prompt:
+
+
+📋 COPY THIS FOR YOUR CODING AGENT:
+Markdown
+# MASTER SPECIFICATION DOCUMENT: VERIFIER AGENT
+**ATTENTION CODING AGENT:** You are tasked with implementing the "Verifier Agent," a production-grade, deterministic, stateless validation engine for an AI-driven house-design pipeline. Read this entire document before writing any code. Your job is to implement the architecture exactly as specified below, using Python, FastAPI, and Pydantic.
+
+## 1. Architectural Directives & Constraints
+This system acts as the "Discriminator" in a GAN-style loop. A separate Generator (Agent A1) proposes a layout, and this Verifier Agent checks it against a dynamic ruleset. 
+
+* **Statelessness:** The Verifier Agent maintains NO state. Do not use Redis, databases, or session tracking. It is a pure function: `f(geometry, constraints) = violations`.
+* **The "No-Leak" Rule (CRITICAL):** The Verifier must tell the Generator *what* is wrong and *by how much* (direction and magnitude), but it MUST NEVER leak corrected coordinates. 
+    * *Allowed:* "Exterior shell spills 12.3 sqft outside the buildable envelope at the northern boundary. Reduce extent inward."
+    * *Forbidden:* "Move house_top_y from 61 to 58" or "Multiply coordinates by 0.94".
+* **Z3 Tool Role:** The external Z3 mathematical tool (`verifier_tool.py`) is used STRICTLY for verification (SAT/UNSAT), *not* for repair. The Verifier does not fix layouts; it only judges them.
+* **Four-Layer Architecture:** You must strictly separate concerns into: Transport (FastAPI), Contract (Pydantic), Dispatcher (Core Logic), and Tool Clients (Adapter Pattern).
+
+---
+
+## 2. Directory Structure
+Generate the codebase using this exact structure:
+
+```text
+Verifier-Agent/
+├── main.py                  # FastAPI transport layer
+├── contracts.py             # Pydantic schemas (Public API)
+├── dispatcher.py            # Routing logic & feedback generation
+├── z3_client.py             # Adapter for the external Z3 tool
+├── config.py                # Environment & constants (TOLERANCE_FT = 1e-06)
+├── requirements.txt         # fastapi, uvicorn, pydantic
+└── demo_inputs/             # Test JSON payloads
+    ├── shell_pass.json
+    └── shell_fail_setback.json
+
+3. Layer Definitions & Implementation Specs
+Layer 1: Transport (main.py)
+Implement a standard FastAPI app.
+Expose POST /verify accepting VerificationRequest and returning VerificationResponse.
+Expose GET /health.
+Expose GET /constraints/supported returning a list of registered constraint handlers.
+Rule: If the Pydantic contract passes but the layout is mathematically invalid, return 200 OK with an UNSAT payload. Do not use 4xx/5xx for geometric violations.
+Layer 2: Contracts (contracts.py)
+Implement these exact Pydantic models. This is the boundary of the application.
+Enums:
+Stage: "shell" | "room"
+Severity: "hard" | "soft"
+GeometryEntity: id (str), type (str), polygon (list of [x,y] float pairs), area_sqft (Optional[float]). Add a Pydantic validator ensuring polygons have >= 3 vertices.
+Constraint: id (str), type (str), severity (Severity), params (dict). (Note: Do not include shapely/z3 tags. Assume all route to Z3 for now).
+VerificationRequest: session_id (str), stage (Stage), entities (list[GeometryEntity]), constraints (list[Constraint]), envelope_polygon (list[[x,y]]), jurisdiction (str), total_lot_area_sqft (float).
+ViolationDetail: constraint_id (str), entity_id (str), severity (Severity), message (str - strictly adhering to the No-Leak rule), current_value (Optional[float]), required_value (Optional[float]), delta (Optional[float]). Note: Explicitly omit any 'suggestion' or 'corrected_coordinates' fields.
+VerificationResponse: session_id (str), result ("SAT" | "UNSAT"), hard_violations (list[ViolationDetail]), soft_violations (list[ViolationDetail]).
+Layer 3: Dispatcher (dispatcher.py)
+This is the core logic router.
+Routing: Currently, there is no Shapely/Z3 split. Route ALL constraint processing to z3_client.py. However, design the dispatch() function modularly so local checks could easily be added later before the Z3 call.
+Unknown Rule Fallback: The upstream Constraint Engine is dynamic. When the Z3 client returns its results, ensure any constraints passed that cannot be evaluated are handled:
+If severity == "soft": Log a warning, ignore it, proceed.
+If severity == "hard": Halt immediately. Append a hard ViolationDetail stating: "System Error: No handler registered for hard constraint type '{type}'".
+Result Assembly: Merge all violations from Z3. If len(hard_violations) > 0, result = "UNSAT", else "SAT".
+No-Leak Sanitization: Ensure the build_diagnostic_message() function scrubs any exact coordinate fixes returned by Z3, leaving only magnitude/direction.
+Layer 4: Tool Clients (z3_client.py)
+The Adapter Pattern
+The external Z3 tool is a Python module provided by another team (verifier_tool.py). Based on its README, it exposes:
+verify_site(house_dict, city_string) for exterior shells.
+verify_interior(layout_dict, city_string) for rooms.
+Adapter Task: You must translate the incoming Pydantic GeometryEntity models into the specific dictionary Z3 expects: {"corners": [[x,y]...], "door": [x,y]}.
+Jurisdiction Passing: Extract the jurisdiction string from the VerificationRequest and pass it to the Z3 function as the city string.
+Tolerance: Use 1e-06 for floating-point tolerance, as specified in the upstream ruleset.
+Stubbing: For the initial build, write a "dummy" Z3 client that uses basic Python math to return mock ViolationDetail objects. Structure the adapter so that swapping the dummy for the real verifier_tool.py import later requires changing only one line.
+4. Testing & Demo Data (demo_inputs/)
+Generate two JSON files to test the API locally via curl or FastAPI Docs.
+shell_pass.json: A valid VerificationRequest payload containing a jurisdiction of "Redmond, WA", where the exterior_shell polygon fits perfectly inside the envelope_polygon.
+shell_fail_setback.json: The exact same payload, but with the exterior_shell polygon scaled up so it breaches the boundary, designed to force an UNSAT response and generate a specific ViolationDetail with delta values.
+END OF SPECIFICATION
+

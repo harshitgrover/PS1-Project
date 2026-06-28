@@ -1,19 +1,17 @@
 {
   "constraint_levels": {
-    "adjacent_to_kitchen": "hard",
     "building_area_sqft": "hard",
     "building_file": "hard",
     "door_corner_margin_ft": "hard",
     "front_setback_ft": "hard",
     "geometry_file": "hard",
     "habitable": "hard",
-    "is_habitable": "hard",
-    "kitchen_adjacency_rule": "hard",
     "max_aspect_ratio": "hard",
     "max_far": "hard",
     "max_height_ft": "hard",
     "max_impervious_surface_pct": "hard",
     "max_lot_coverage_fraction": "hard",
+    "max_side_ft": "hard",
     "max_vehicle_parking_spaces_per_unit": "hard",
     "min_area_fraction_of_max": "hard",
     "min_area_ft2": "hard",
@@ -33,14 +31,11 @@
     "ventilation_type": "soft"
   },
   "descriptions": {
-    "adjacent_to_kitchen": "Specifies that the bedroom must share a boundary with the kitchen area.",
     "building_area_sqft": "Total calculated building area in square feet.",
     "building_file": "File path to the existing building geometry (if any).",
     "door_corner_margin_ft": "Minimum distance a door must be placed from an internal corner.",
     "front_setback_ft": "Minimum front property line setback in feet.",
     "geometry_file": "File path to the raw lot geometry.",
-    "is_habitable": "Specifies that the kitchen space must meet residential habitability standards.",
-    "kitchen_adjacency_rule": "Enforces spatial proximity constraints between kitchen units and bedroom units.",
     "max_far": "Maximum Floor Area Ratio (FAR) allowed before purchasing bonus density.",
     "max_height_ft": "Maximum allowed building height in feet.",
     "max_impervious_surface_pct": "Maximum allowed percentage of impervious surfaces on the lot.",
@@ -79,6 +74,36 @@
   "interior": {
     "adjacency_rules": [
       {
+        "a": "bathroom",
+        "b": "bedroom",
+        "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 4.0,
+        "relation": "ensuite_required"
+      },
+      {
+        "a": "bathroom",
+        "b": "corridor",
+        "description": "Bathroom must connect to a corridor sharing at least 2.5ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 2.5,
+        "relation": "must_touch"
+      },
+      {
+        "a": "bathroom",
+        "b": "kitchen",
+        "description": "Bathroom must not share a wall with the kitchen.",
+        "level": "hard",
+        "relation": "must_not_touch"
+      },
+      {
+        "a": "bathroom",
+        "b": "bathroom",
+        "description": "Bathrooms must not share a wall with each other.",
+        "level": "hard",
+        "relation": "must_not_touch"
+      },
+      {
         "a": "bedroom",
         "b": "corridor",
         "description": "Bedroom must connect to a corridor sharing at least 3ft of wall.",
@@ -94,15 +119,44 @@
         "relation": "must_not_touch"
       },
       {
+        "a": "bedroom",
+        "b": "bathroom",
+        "description": "Bedroom to Bathroom must be < 25 ft.",
+        "level": "hard",
+        "max_dist_ft": 25.0,
+        "relation": "distance_limit"
+      },
+      {
         "a": "living",
         "b": "kitchen",
         "description": "Kitchen must connect to the living room sharing at least 2.5ft of wall.",
         "level": "hard",
         "min_shared_wall_ft": 2.5,
         "relation": "must_touch"
+      },
+      {
+        "a": "corridor",
+        "b": "living",
+        "description": "Living room must connect to a corridor sharing at least 3ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 3.0,
+        "relation": "must_touch"
+      },
+      {
+        "a": "corridor",
+        "b": "kitchen",
+        "description": "Kitchen must connect to a corridor sharing at least 3ft of wall.",
+        "level": "hard",
+        "min_shared_wall_ft": 3.0,
+        "relation": "must_touch"
       }
     ],
     "area_rules": [
+      {
+        "description": "Bathroom must be smaller than the bedroom it serves.",
+        "level": "hard",
+        "rule": "bathroom_lt_served_bedroom"
+      },
       {
         "description": "Living room must be larger than each individual bedroom.",
         "level": "hard",
@@ -111,19 +165,31 @@
     ],
     "corridor_max_fraction_of_usable": 0.15,
     "coverage_tol_fraction": 0.05,
-    "kitchen_adjacency_rule": true,
     "max_far": 3.0,
     "max_vehicle_parking_spaces_per_unit": 1.5,
     "min_bicycle_parking_spaces_per_unit": 1.0,
     "required_rooms": {
-      "bedroom": 5,
+      "bathroom": 2,
+      "bedroom": 2,
       "corridor": 1,
-      "kitchen": 2,
+      "kitchen": 1,
       "living": 1
     },
     "room_specs": {
+      "bathroom": {
+        "habitable": false,
+        "max_aspect_ratio": 2.0,
+        "max_side_ft": 15.0,
+        "min_area_ft2": 25.0,
+        "min_aspect_ratio": 1.0,
+        "min_side_ft": 5.0,
+        "requires_closet": false,
+        "requires_door": true,
+        "requires_egress": false,
+        "requires_exterior_window": false,
+        "ventilation_type": "exhaust"
+      },
       "bedroom": {
-        "adjacent_to_kitchen": true,
         "habitable": true,
         "max_aspect_ratio": 1.8,
         "min_area_ft2": 70.0,
@@ -149,9 +215,8 @@
       },
       "kitchen": {
         "habitable": true,
-        "is_habitable": true,
         "max_aspect_ratio": 2.0,
-        "min_area_ft2": 500,
+        "min_area_ft2": 70.0,
         "min_aspect_ratio": 1.0,
         "min_side_ft": 7.0,
         "requires_closet": false,
