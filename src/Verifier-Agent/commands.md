@@ -41,5 +41,5 @@ curl -X POST "http://127.0.0.1:8000/verify" \
 mkdir -p json_files && \
 curl -s -X POST "http://127.0.0.1:8000/verify" \
      -H "Content-Type: application/json" \
-     -d @demo_inputs/dynamic_interior.json > json_files/interior_output.json
+     -d @demo_inputs/dynamic_interior.json | jq . > json_files/interior_output.json
 ```
