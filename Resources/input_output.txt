@@ -1,0 +1,121 @@
+Updated Input/Output Schema and
+File Storage
+Part 1- Updated Input/Output Schema
+Every agent's request and response must follow this exact top-level structure. Only three things live at the top level, outside Properties: session_id, status (output only), and file_refs (if your agent produces or needs files). Everything else, every field specific to your agent, goes inside Properties, and Agent Manager stores it as-is without inspecting or extracting individual fields. 
+Since Agent Manager only stores whatever is inside Properties as-is without parsing it, it's your responsibility as agent owners to coordinate directly with each other on the exact field names and structure inside Properties for any data that gets passed between your agents. If your agent consumes another agent's output, please confirm the exact shape directly with that agent's owner. 
+
+PLEASE FOLLOW THE BELOW FORMAT.
+Input template
+{
+    "session_id": "string",
+    "file_refs": [
+        {
+            "type": "dxf | png | pdf | json",
+            "bucket": "string",
+            "key": "string"
+        }
+    ],
+    "Properties": {
+        "field_name_1": "string / number / boolean / list / dict",
+        "field_name_2": {
+            "nested_field_1": "string / number / boolean / list / dict",
+            "nested_field_2": "string / number / boolean / list / dict"
+        }
+    }
+}
+
+Output template
+{
+    "session_id": "string",
+    "status": "success | failed | needs_retry",
+    "file_refs": [
+        {
+            "type": "dxf | png | pdf | json",
+            "bucket": "string",
+            "key": "string"
+        }
+    ],
+    "Properties": {
+        "field_name_1": "string / number / boolean / list / dict",
+        "field_name_2": {
+            "nested_field_1": "string / number / boolean / list / dict",
+            "nested_field_2": "string / number / boolean / list / dict"
+        }
+    }
+}
+Passing another agent's output as input
+Whenever your agent's input includes data from a previous agent (whether one or several), Agent Manager will nest that agent's entire output under a key named {agent_name}_output, inside your Properties. Agent Manager does not extract or flatten individual fields from the upstream agent's output, you'll always receive that agent's complete Properties object, nested under its own key.
+Example, if your agent needs Constraint Agent's output:
+"Properties": {
+    "constraint_output": { "...Constraint Agent's full Properties object..." }
+}
+Example, if your agent needs both Planner's and Location Zoning's output:
+"Properties": {
+    "planner_output": { "...Planner's full Properties object..." },
+    "location_zoning_output": { "...Location Zoning's full Properties object..." }
+}
+Part 2- File Storage
+To keep file handling consistent across the whole pipeline, every agent that produces a file (DXF drawings, PDFs, etc.) needs to upload it to one shared private S3 bucket.
+Once the bucket is set up, you'll be given:
+AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, scoped to read/write access on this one bucket only
+The shared bucket name
+Naming convention
+To avoid any file collisions, between agents, between sessions, and between retry iterations of the same agent, every file must be stored using this exact path pattern:
+{agent_name}/{session_id}/{iteration_number}_{file_type}.{extension}
+
+Examples:
+site_plan/abc123-def456/3_output.dxf
+dxf_generator/abc123-def456/1_dxf.dxf
+dxf_generator/abc123-def456/1_png.png
+How you upload a file: Using the credentials I give you, upload via boto3:
+import boto3
+s3 = boto3.client(
+    's3',
+    aws_access_key_id='<credentials I provide>',
+    aws_secret_access_key='<credentials I provide>'
+)
+s3.upload_file(
+    Filename='local_path/to/your_file.dxf',
+    Bucket='<shared-bucket-name>',
+    Key='{agent_name}/{session_id}/{iteration_number}_{file_type}.{extension}' )
+
+Then just return the Bucket + Key (not a public URL, since the bucket is private) in your JSON response to agent manager. I'll handle fetching it from there using the same credentials.
+
+How you read a file (if your agent needs something another agent produced):
+Two common ways depending on what you need:
+Option A - Download the file to local disk, if your agent's code expects an actual file on disk (e.g. a library that only reads from a file path):
+import boto3
+s3 = boto3.client(
+    's3',
+    aws_access_key_id='<credentials I provide>',
+    aws_secret_access_key='<credentials I provide>'
+)
+
+s3.download_file(
+    Bucket='<shared-bucket-name>',
+    Key='{agent_name}/{session_id}/{iteration_number}_{file_type}.{extension}',
+    Filename='local_path/to/save_it.dxf'
+)
+After this runs, the file exists at local_path/to/save_it.dxf on your own machine/server, exactly as if someone had manually placed it there.
+Option B - Read the file's contents directly into memory, useful for JSON files you want to parse immediately without saving to disk first:
+import boto3
+import json
+s3 = boto3.client(
+    's3',
+    aws_access_key_id='<credentials I provide>',
+    aws_secret_access_key='<credentials I provide>'
+)
+response = s3.get_object(
+    Bucket='<shared-bucket-name>',
+    Key='{agent_name}/{session_id}/{iteration_number}_{file_type}.{extension}'
+)
+file_contents = response['Body'].read()  # raw bytes
+parsed_json = json.loads(file_contents)  # if it's JSON, parse it directly
+
+Use Option A for binary files you need to actually process with a library (DXF files, images). Use Option B for JSON or text data you just want to read and use immediately in your code.
+
+For end users downloading the final output: Generate a temporary signed URL when the file is ready to be shared. This gives the user a working download link for a limited time window, without the bucket ever being public.
+
+notes-
+What needs to be shown to user: <Workspace>/<project name>/<agent name>/<filename>
+Internal (under project name), external

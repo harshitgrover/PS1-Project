@@ -1,0 +1,25 @@
+{
+  "session_id": "test_dynamic_bellevue",
+  "stage": "shell",
+  "entities": [
+    {
+      "id": "exterior_shell",
+      "type": "shell",
+      "polygon": [[10.51, 25.0], [69.49, 25.0], [69.49, 68.55], [10.51, 68.55]]
+    }
+  ],
+  "constraints": [
+    { "id": "front_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 25.0} },
+    { "id": "rear_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 15.0} },
+    { "id": "side_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 7.5} },
+    { "id": "tree_buffer_ft", "type": "boundary", "severity": "hard", "params": {"value": 5.0} },
+    { "id": "min_house_width_ft", "type": "dimension", "severity": "hard", "params": {"value": 20.0} },
+    { "id": "min_house_depth_ft", "type": "dimension", "severity": "hard", "params": {"value": 20.0} },
+    { "id": "door_corner_margin_ft", "type": "dimension", "severity": "hard", "params": {"value": 2.0} },
+    { "id": "min_area_fraction_of_max", "type": "area", "severity": "hard", "params": {"value": 0.85} },
+    { "id": "max_lot_coverage_fraction", "type": "area", "severity": "hard", "params": {"value": 0.40} }
+  ],
+  "envelope_polygon": [[0.0, 0.0], [0.0, 80.0], [80.0, 80.0], [80.0, 0.0]],
+  "total_lot_area_sqft": 6400.0,
+  "jurisdiction": "bellevue"
+}

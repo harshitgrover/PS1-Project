@@ -1,0 +1,10 @@
+supabase>=2.3.4
+python-dotenv
+google-generativeai
+ezdxf
+matplotlib
+z3-solver
+fastapi
+uvicorn
+pydantic
+httpx

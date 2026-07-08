@@ -1,0 +1,25 @@
+{
+  "session_id": "test_dynamic_seattle",
+  "stage": "shell",
+  "entities": [
+    {
+      "id": "exterior_shell",
+      "type": "shell",
+      "polygon": [[13.96, 20.0], [66.04, 20.0], [66.04, 63.15], [13.96, 63.15]]
+    }
+  ],
+  "constraints": [
+    { "id": "front_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 20.0} },
+    { "id": "rear_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 10.0} },
+    { "id": "side_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 5.0} },
+    { "id": "tree_buffer_ft", "type": "boundary", "severity": "hard", "params": {"value": 3.0} },
+    { "id": "min_house_width_ft", "type": "dimension", "severity": "hard", "params": {"value": 20.0} },
+    { "id": "min_house_depth_ft", "type": "dimension", "severity": "hard", "params": {"value": 20.0} },
+    { "id": "door_corner_margin_ft", "type": "dimension", "severity": "hard", "params": {"value": 2.0} },
+    { "id": "min_area_fraction_of_max", "type": "area", "severity": "hard", "params": {"value": 0.90} },
+    { "id": "max_lot_coverage_fraction", "type": "area", "severity": "hard", "params": {"value": 0.35} }
+  ],
+  "envelope_polygon": [[0.0, 0.0], [0.0, 80.0], [80.0, 80.0], [80.0, 0.0]],
+  "total_lot_area_sqft": 6400.0,
+  "jurisdiction": "seattle"
+}

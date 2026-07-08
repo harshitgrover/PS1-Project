@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifier Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 400px),
+                              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 400px);
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        button.seattle:hover { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        button.bellevue:hover { border-color: var(--accent-green); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+        button.failing:hover { border-color: var(--accent-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+
+        #result {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .sat { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .unsat { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+        pre {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            color: #a5b4fc;
+            font-size: 0.9rem;
+        }
+
+        .violation {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--accent-red);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin: 2rem auto;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #a5b4fc;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <h1>Verifier Agent Core</h1>
+        <p class="subtitle">Paste your VerificationRequest JSON below to dynamically test any layout and constraints.</p>
+
+        <div class="card">
+            <textarea id="jsonInput" placeholder="Paste JSON here..." style="margin-top: 1rem;"></textarea>
+            <button class="seattle" onclick="runVerification()" style="width: 100%; margin-top: 1rem; border-color: var(--accent-blue);">Verify</button>
+        </div>
+
+        <div class="loader" id="loader"></div>
+
+        <div class="card" id="result">
+            <div id="statusBadge" class="result-badge">SAT</div>
+            <p id="summaryText"></p>
+            <div id="violationsContainer"></div>
+            <details style="margin-top: 1rem;">
+                <summary style="cursor: pointer; color: var(--text-muted);">View Raw JSON Response</summary>
+                <pre id="rawJson"></pre>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        // Pre-fill with a valid dynamic Seattle example
+        const payloads = {
+            seattle: {
+                "session_id": "test_dynamic_seattle",
+                "stage": "shell",
+                "entities": [{"id": "exterior_shell", "type": "shell", "polygon": [[13.96, 20.0], [66.04, 20.0], [66.04, 63.15], [13.96, 63.15]]}],
+                "constraints": [
+                    { "id": "front_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 20.0} },
+                    { "id": "rear_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 10.0} },
+                    { "id": "side_setback_ft", "type": "boundary", "severity": "hard", "params": {"value": 5.0} },
+                    { "id": "tree_buffer_ft", "type": "boundary", "severity": "hard", "params": {"value": 3.0} },
+                    { "id": "min_house_width_ft", "type": "dimension", "severity": "hard", "params": {"value": 20.0} },
+                    { "id": "min_house_depth_ft", "type": "dimension", "severity": "hard", "params": {"value": 20.0} },
+                    { "id": "min_area_fraction_of_max", "type": "area", "severity": "hard", "params": {"value": 0.90} },
+                    { "id": "max_lot_coverage_fraction", "type": "area", "severity": "hard", "params": {"value": 0.35} }
+                ],
+                "envelope_polygon": [[0.0, 0.0], [0.0, 80.0], [80.0, 80.0], [80.0, 0.0]],
+                "total_lot_area_sqft": 6400.0,
+                "jurisdiction": "seattle"
+            },
+            interior: {
+                "session_id": "test_interior",
+                "stage": "room",
+                "entities": [
+                    {
+                        "id": "exterior_shell",
+                        "type": "shell",
+                        "polygon": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                40,
+                                0
+                            ],
+                            [
+                                40,
+                                30
+                            ],
+                            [
+                                0,
+                                30
+                            ]
+                        ]
+                    },
+                    {
+                        "id": "living_room",
+                        "type": "living",
+                        "polygon": [
+                            [
+                                0,
+                                0
+                            ],
+                            [
+                                20,
+                                0
+                            ],
+                            [
+                                20,
+                                30
+                            ],
+                            [
+                                0,
+                                30
+                            ]
+                        ]
+                    },
+                    {
+                        "id": "master_bedroom",
+                        "type": "bedroom",
+                        "polygon": [
+                            [
+                                20,
+                                0
+                            ],
+                            [
+                                40,
+                                0
+                            ],
+                            [
+                                40,
+                                15
+                            ],
+                            [
+                                20,
+                                15
+                            ]
+                        ]
+                    },
+                    {
+                        "id": "bathroom",
+                        "type": "bathroom",
+                        "polygon": [
+                            [
+                                20,
+                                15
+                            ],
+                            [
+                                40,
+                                15
+                            ],
+                            [
+                                40,
+                                30
+                            ],
+                            [
+                                20,
+                                30
+                            ]
+                        ]
+                    }
+                ],
+                "constraints": [
+                    {
+                        "id": "room_min_area",
+                        "type": "area",
+                        "severity": "hard",
+                        "params": {
+                            "value": 70.0
+                        }
+                    },
+                    {
+                        "id": "room_no_overlap",
+                        "type": "logic",
+                        "severity": "hard",
+                        "params": {
+                            "value": 1.0
+                        }
+                    },
+                    {
+                        "id": "door_corner_margin_ft",
+                        "type": "dimension",
+                        "severity": "hard",
+                        "params": {
+                            "value": 2.0
+                        }
+                    }
+                ],
+                "jurisdiction": "seattle",
+                "envelope_polygon": [[0.0, 0.0], [0.0, 80.0], [80.0, 80.0], [80.0, 0.0]],
+                "total_lot_area_sqft": 6400.0,
+                "interior_rules": {
+                    "adjacency_rules": [
+                        {
+                            "a": "bathroom",
+                            "b": "bedroom",
+                            "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall.",
+                            "level": "hard",
+                            "min_shared_wall_ft": 4.0,
+                            "relation": "ensuite_required"
+                        },
+                        {
+                            "a": "bathroom",
+                            "b": "corridor",
+                            "description": "Bathroom must connect to a corridor sharing at least 2.5ft of wall.",
+                            "level": "hard",
+                            "min_shared_wall_ft": 2.5,
+                            "relation": "must_touch"
+                        },
+                        {
+                            "a": "bathroom",
+                            "b": "kitchen",
+                            "description": "Bathroom must not share a wall with the kitchen.",
+                            "level": "hard",
+                            "relation": "must_not_touch"
+                        },
+                        {
+                            "a": "bathroom",
+                            "b": "bathroom",
+                            "description": "Bathrooms must not share a wall with each other.",
+                            "level": "hard",
+                            "relation": "must_not_touch"
+                        },
+                        {
+                            "a": "bedroom",
+                            "b": "corridor",
+                            "description": "Bedroom must connect to a corridor sharing at least 3ft of wall.",
+                            "level": "hard",
+                            "min_shared_wall_ft": 3.0,
+                            "relation": "must_touch"
+                        },
+                        {
+                            "a": "bedroom",
+                            "b": "kitchen",
+                            "description": "Kitchen should not share a wall with a bedroom.",
+                            "level": "hard",
+                            "relation": "must_not_touch"
+                        },
+                        {
+                            "a": "bedroom",
+                            "b": "bathroom",
+                            "description": "Bedroom to Bathroom must be < 25 ft.",
+                            "level": "hard",
+                            "max_dist_ft": 25.0,
+                            "relation": "distance_limit"
+                        },
+                        {
+                            "a": "living",
+                            "b": "kitchen",
+                            "description": "Kitchen must connect to the living room sharing at least 2.5ft of wall.",
+                            "level": "hard",
+                            "min_shared_wall_ft": 2.5,
+                            "relation": "must_touch"
+                        },
+                        {
+                            "a": "corridor",
+                            "b": "living",
+                            "description": "Living room must connect to a corridor sharing at least 3ft of wall.",
+                            "level": "hard",
+                            "min_shared_wall_ft": 3.0,
+                            "relation": "must_touch"
+                        },
+                        {
+                            "a": "corridor",
+                            "b": "kitchen",
+                            "description": "Kitchen must connect to a corridor sharing at least 3ft of wall.",
+                            "level": "hard",
+                            "min_shared_wall_ft": 3.0,
+                            "relation": "must_touch"
+                        }
+                    ],
+                    "area_rules": [
+                        {
+                            "description": "Bathroom must be smaller than the bedroom it serves.",
+                            "level": "hard",
+                            "rule": "bathroom_lt_served_bedroom"
+                        },
+                        {
+                            "description": "Living room must be larger than each individual bedroom.",
+                            "level": "hard",
+                            "rule": "living_gt_each_bedroom"
+                        }
+                    ],
+                    "corridor_max_fraction_of_usable": 0.15,
+                    "coverage_tol_fraction": 0.05,
+                    "max_far": 3.0,
+                    "max_vehicle_parking_spaces_per_unit": 1.5,
+                    "min_bicycle_parking_spaces_per_unit": 1.0,
+                    "required_rooms": {
+                        "bathroom": 2,
+                        "bedroom": 2,
+                        "corridor": 1,
+                        "kitchen": 1,
+                        "living": 1
+                    },
+                    "room_specs": {
+                        "bathroom": {
+                            "habitable": false,
+                            "max_aspect_ratio": 2.0,
+                            "max_side_ft": 15.0,
+                            "min_area_ft2": 25.0,
+                            "min_aspect_ratio": 1.0,
+                            "min_side_ft": 5.0,
+                            "requires_closet": false,
+                            "requires_door": true,
+                            "requires_egress": false,
+                            "requires_exterior_window": false,
+                            "ventilation_type": "exhaust"
+                        },
+                        "bedroom": {
+                            "habitable": true,
+                            "max_aspect_ratio": 1.8,
+                            "min_area_ft2": 70.0,
+                            "min_aspect_ratio": 1.0,
+                            "min_side_ft": 7.0,
+                            "requires_closet": true,
+                            "requires_door": true,
+                            "requires_egress": true,
+                            "requires_exterior_window": true,
+                            "ventilation_type": "natural"
+                        },
+                        "corridor": {
+                            "habitable": false,
+                            "max_aspect_ratio": 10.0,
+                            "min_area_ft2": 16.0,
+                            "min_aspect_ratio": 3.0,
+                            "min_side_ft": 4.0,
+                            "requires_closet": false,
+                            "requires_door": false,
+                            "requires_egress": false,
+                            "requires_exterior_window": false,
+                            "ventilation_type": "none"
+                        },
+                        "kitchen": {
+                            "habitable": true,
+                            "max_aspect_ratio": 2.0,
+                            "min_area_ft2": 70.0,
+                            "min_aspect_ratio": 1.0,
+                            "min_side_ft": 7.0,
+                            "requires_closet": false,
+                            "requires_door": true,
+                            "requires_egress": false,
+                            "requires_exterior_window": false,
+                            "ventilation_type": "mechanical_or_natural"
+                        },
+                        "living": {
+                            "habitable": true,
+                            "max_aspect_ratio": 2.0,
+                            "min_area_ft2": 70.0,
+                            "min_aspect_ratio": 1.2,
+                            "min_side_ft": 7.0,
+                            "requires_closet": false,
+                            "requires_door": true,
+                            "requires_egress": false,
+                            "requires_exterior_window": true,
+                            "ventilation_type": "natural"
+                        }
+                    }
+                }
+            }
+        };
+        document.getElementById('jsonInput').value = JSON.stringify(payloads.seattle, null, 2);
+
+        async function runVerification() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            let payload;
+            try {
+                payload = JSON.parse(document.getElementById('jsonInput').value);
+            } catch (e) {
+                alert("Invalid JSON format!");
+                document.getElementById('loader').style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('loader').style.display = 'none';
+                const resultDiv = document.getElementById('result');
+                const badge = document.getElementById('statusBadge');
+                const rawJson = document.getElementById('rawJson');
+                const vContainer = document.getElementById('violationsContainer');
+                const sumText = document.getElementById('summaryText');
+
+                resultDiv.style.display = 'block';
+                rawJson.textContent = JSON.stringify(data, null, 2);
+                vContainer.innerHTML = '';
+
+                if (data.result === "SAT") {
+                    badge.textContent = "✅ SATISFIED";
+                    badge.className = "result-badge sat";
+                    sumText.textContent = "The layout mathematically passes all constraint checks via the Z3 solver.";
+                } else if (data.detail) {
+                    badge.textContent = "⚠️ API ERROR";
+                    badge.className = "result-badge unsat";
+                    sumText.textContent = "The request payload failed validation.";
+                    rawJson.style.display = "block";
+                } else {
+                    badge.textContent = "❌ UNSATISFIED";
+                    badge.className = "result-badge unsat";
+                    sumText.textContent = "The layout violates one or more rules. See 'No-Leak' feedback below:";
+                    
+                    if (data.hard_violations) {
+                        data.hard_violations.forEach(v => {
+                            const vDiv = document.createElement('div');
+                            vDiv.className = 'violation';
+                            vDiv.innerHTML = `<strong>Rule: ${v.constraint_id}</strong><br/>${v.message}`;
+                            vContainer.appendChild(vDiv);
+                        });
+                    }
+                }
+            } catch (err) {
+                alert("Error connecting to server. Is the API running?");
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

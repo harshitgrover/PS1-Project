@@ -1,0 +1,44 @@
+
+The mathematical referee of the system: runs the Z3 based check over whatever the Generator produced and returns a deterministic pass/fail plus the specific violated constraints the team's existing two agent (generator + verifier) loop is built around this.
+ 
+ 	
+Must catch every constraint violation type already observed in testing: setback breaches, lot coverage overages, tree zone intrusions, room overlaps, room area shortfalls, and adjacency violations. Feedback returned on failure must be diagnostic and specific (e.g. “move house_top_y from 61 to 65”) and must never leak the corrected coordinates back to the Generator, several groups found that leaking the answer collapses the two agent loop into one and defeats the purpose of verification. Must run the Z3 solver as part of this agent (per the mentor's explicit clarification that Z3 lives inside the Verifier Agent, even though it can also be run locally). Must handle floating point tolerance so it doesn't produce false negatives on near exact constraint satisfaction.
+
+☐ Catches setback breaches (front/rear/side) with zero false negatives
+ ☐ Catches lot-coverage overages
+ ☐ Catches tree-protection-zone intrusions
+ ☐ Catches room-to-room overlaps
+ ☐ Catches room-area shortfalls against minimum size requirements
+ ☐ Catches adjacency rule violations (e.g. bathroom-bathroom, bathroom-kitchen)
+ ☐ Returns specific, diagnostic feedback on failure (e.g. “move house_top_y from 61 to 65”) — not just pass/fail
+ ☐ Never leaks the corrected coordinates back to the Generator Agent (would collapse the two-agent loop)
+ ☐ Z3 solver runs as a step inside this agent, with floating-point tolerance set to avoid false-negative failures on near-exact matches
+ ☐ Verification turnaround time < 5 seconds per submitted layout
+
+ Q5. Packing Strategy Translation Layer
+Who owns the conversion of a user-selected packing strategy into structured constraints that Z3 can consume?
+Possible owners:
+* Planning Agent
+* Constraint Engine
+* New dedicated translation component
+Also, should packing strategy selection remain user-driven or be automated?;               Q1. Constraint Tagging Strategy
+Can Constraint Engine attach explicit metadata to every constraint object, such as:
+* evaluation: shapely | z3
+* stage: shell | room
+This would allow Verifier to dispatch constraints based on tags instead of inferring behavior at runtime.
+Q2. Z3 Repair Capability
+Does the shared Z3 Verifier support repair/minimal-edit mode (returning coordinate adjustments or infeasibility proofs), or does it currently provide only SAT/UNSAT feasibility checking?
+Q3. Z3 Optimization Scope
+Should the Z3 tool support optimization for room-stage packing problems, such as:
+* habitable area vs. corridor ratio
+* adjacency satisfaction
+* strategy feasibility evaluation
+Q4. Feedback to Generator Agent
+Does the rule "never leak corrected coordinates back to the Generator" apply specifically to Agent A1? If so, what information can safely be passed back as feedback without revealing coordinates?
+
+ 
+ 	
+A1: think of constraint like user defined and system defined. But not sure how it'll help verifier? Sure tagging helps classify constraints 
+A2: Z3 will only verify. Repair needs to be handled by a separate agent. 
+A3: good question. No. This needs to be handled by a separate agent preferably floor plan agent. 
+A5: Floor plan agent is my preference. 

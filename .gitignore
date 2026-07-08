@@ -1,0 +1,13 @@
+.DS_Store
+**/.DS_Store
+
+# Python Cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Environment and Logs
+.env
+api.log
+pyrefly.toml
+venv/

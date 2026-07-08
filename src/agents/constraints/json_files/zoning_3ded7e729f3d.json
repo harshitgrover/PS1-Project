@@ -1,0 +1,41 @@
+{
+  "address": "one microsoft way, redmond, usa",
+  "city": "Redmond",
+  "zone": "OBAT",
+  "latitude": 47.6411813,
+  "longitude": -122.1266792,
+  "parcel_centroid": {
+    "lat": 47.63956595727283,
+    "lon": -122.12844753035155
+  },
+  "parcel_area": 4289358.725313804,
+  "lot_vertex_count": 32,
+  "status": "ok",
+  "jurisdiction": "Redmond, WA",
+  "zone_code": "OBAT",
+  "zone_type": "mixed_use",
+  "zone_description": "Overlake Business and Advanced Technology District",
+  "overlay_districts": [],
+  "setbacks_ft": {
+    "front": 0,
+    "rear": 0,
+    "side": 0
+  },
+  "max_lot_coverage_pct": null,
+  "max_impervious_surface_pct": 80,
+  "max_height_ft": 150,
+  "max_height_ft_nonresidential": 120,
+  "max_height_ft_with_incentives": 230,
+  "min_height_ft": 35,
+  "max_far": 3.0,
+  "max_far_with_incentives": 9.5,
+  "ground_floor_min_ceiling_ft": 16,
+  "tree_protection_zones": [],
+  "source_url": "https://redmond.municipal.codes/RZC/21.12.500",
+  "parcel_id": "5503000010",
+  "parcel_area_sqft": 4289358.725313804,
+  "building_count": 39,
+  "building_area_sqft": 1113207.6441514671,
+  "building_file": "outputs/one microsoft way_ redmond_ usa_buildings.json",
+  "geometry_file": "outputs/one microsoft way_ redmond_ usa_geometry.json"
+}
