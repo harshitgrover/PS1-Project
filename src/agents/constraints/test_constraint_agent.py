@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from fastapi.testclient import TestClient
 from src.agents.constraints.api import app
 from src.agents.constraints.constraint_agent import ConstraintAgent
+from src.agents.constraints.validator import ConstraintValidationError
 
 
 class TestConstraintAgentAPI(unittest.TestCase):
@@ -112,6 +113,25 @@ class TestConstraintAgentClass(unittest.TestCase):
         self.assertEqual(result["exterior"]["front_setback_ft"], 20.0)
         self.assertEqual(result["exterior"]["rear_setback_ft"], 15.0)
         self.assertEqual(result["exterior"]["side_setback_ft"], 5.0)
+
+    @patch("src.agents.constraints.llm_parser.parse_user_constraints")
+    def test_process_zoning_input_raises_validation_error(self, mock_parse):
+        """process_zoning_input must raise ConstraintValidationError if habitability is violated."""
+        # Mock the LLM returning only bedrooms (violates building codes requiring bath/kitchen)
+        mock_parse.return_value = {
+            "required_instances": ["bedroom_1", "bedroom_2"]
+        }
+        
+        agent = ConstraintAgent()
+        zoning_data = {"jurisdiction": "Redmond, WA"}
+
+        with self.assertRaises(ConstraintValidationError) as context:
+            agent.process_zoning_input(data=zoning_data, user_text="I want 2 bedrooms")
+
+        # Verify the exception reasons mention the missing rooms
+        reasons_text = " ".join(context.exception.reasons)
+        self.assertIn("bathroom", reasons_text.lower())
+        self.assertIn("kitchen", reasons_text.lower())
 
 
 if __name__ == "__main__":
