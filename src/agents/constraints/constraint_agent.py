@@ -108,6 +108,27 @@ class ConstraintAgent:
             except Exception as e:
                 logger.error(f"Failed to parse user_constraints with LLM: {e}", exc_info=True)
 
+        # 2. Fetch Interior rules ONLY for required entities
+        # Baseline minimums required for a valid layout (instance IDs)
+        required_instances = ["bathroom_1", "bathroom_2", "bedroom_1", "bedroom_2", "living_1", "kitchen_1", "corridor_1"]
+
+        # Smart merge before validation
+        if parsed_user_constraints and "required_instances" in parsed_user_constraints and isinstance(parsed_user_constraints["required_instances"], list):
+            user_instances = parsed_user_constraints["required_instances"]
+            user_base_types = set([inst.rsplit('_', 1)[0] for inst in user_instances])
+            final_instances = list(user_instances)
+            for default_inst in required_instances:
+                base = default_inst.rsplit('_', 1)[0]
+                if base not in user_base_types:
+                    final_instances.append(default_inst)
+            
+            # Apply exclusion if present
+            if "excluded_base_types" in parsed_user_constraints and isinstance(parsed_user_constraints["excluded_base_types"], list):
+                excluded = set(parsed_user_constraints["excluded_base_types"])
+                final_instances = [inst for inst in final_instances if inst.rsplit('_', 1)[0] not in excluded and inst.replace('_1','').replace('_2','') not in excluded]
+
+            parsed_user_constraints["required_instances"] = final_instances
+
         # 1. Validate constraints before doing heavy lifting
         # Pass the parsed dictionary to the validator
         validator = ConstraintValidator(
@@ -204,8 +225,7 @@ class ConstraintAgent:
         }
         
         # 2. Fetch Interior rules ONLY for required entities
-        # Baseline minimums required for a valid layout (instance IDs)
-        required_instances = ["bathroom_1", "bathroom_2", "bedroom_1", "bedroom_2", "living_1", "kitchen_1", "corridor_1"]
+        # required_instances is already defined and smartly merged at the top
         
         # 2.1 Parse user constraints via LLM if provided
         room_overrides = {}
@@ -219,23 +239,9 @@ class ConstraintAgent:
         if parsed_user_constraints:
             try:
                 parsed = parsed_user_constraints
+                print(f"DEBUG: parsed LLM output: {parsed}")
                 if "required_instances" in parsed and isinstance(parsed["required_instances"], list):
-                    # Smart merge: if user specifies a base type (e.g. bedroom), replace defaults for THAT base type.
-                    # Keep defaults for base types the user didn't mention (e.g. kitchen).
-                    user_instances = parsed["required_instances"]
-                    user_base_types = set([inst.rsplit('_', 1)[0] for inst in user_instances])
-                    
-                    final_instances = list(user_instances)
-                    for default_inst in required_instances:
-                        base = default_inst.rsplit('_', 1)[0]
-                        if base not in user_base_types:
-                            final_instances.append(default_inst)
-                            
-                    required_instances = final_instances
-                if "excluded_base_types" in parsed and isinstance(parsed["excluded_base_types"], list):
-                    excluded = set(parsed["excluded_base_types"])
-                    # Remove any default instances whose base type is excluded
-                    required_instances = [inst for inst in required_instances if inst.rsplit('_', 1)[0] not in excluded and inst.replace('_1','').replace('_2','') not in excluded]
+                    required_instances = parsed["required_instances"]
                 if "room_overrides" in parsed and isinstance(parsed["room_overrides"], dict):
                     room_overrides = parsed["room_overrides"]
                 if "global_exterior_overrides" in parsed and isinstance(parsed["global_exterior_overrides"], dict):
@@ -328,11 +334,13 @@ class ConstraintAgent:
                         # Store any adjacency rules
                         for rel in ent_data.get("relational_rules", []):
                             rule_copy = dict(rel)
-                            rule_copy["level"] = assign_level(f"{rule_copy['a']}_{rule_copy['relation']}_{rule_copy['b']}")
-                            # Add a flag so downstream engines know this is a base-type generic rule, not an instance override
-                            rule_copy["is_base_rule"] = True
-                            if rule_copy not in adjacency_rules:
-                                adjacency_rules.append(rule_copy)
+                            # Only include adjacency rules for entities that are actually required
+                            if rule_copy['a'] in base_types_needed and rule_copy['b'] in base_types_needed:
+                                rule_copy["level"] = assign_level(f"{rule_copy['a']}_{rule_copy['relation']}_{rule_copy['b']}")
+                                # Add a flag so downstream engines know this is a base-type generic rule, not an instance override
+                                rule_copy["is_base_rule"] = True
+                                if rule_copy not in adjacency_rules:
+                                    adjacency_rules.append(rule_copy)
                                 
                         # Store any area rules
                         for a_rule in ent_data.get("area_rules", []):
@@ -355,9 +363,15 @@ class ConstraintAgent:
                        u_adj["description"] = user_descriptions.get(desc_key, f"User rule: {desc_key}")
                   adjacency_rules.append(u_adj)
                 
+        # Build a count dictionary for required_rooms (e.g. {"bedroom": 3, "bathroom": 2})
+        required_rooms_counts = {}
+        for inst in required_instances:
+            base = inst.rsplit('_', 1)[0]
+            required_rooms_counts[base] = required_rooms_counts.get(base, 0) + 1
+            
         # Default interior constraints
         interior: dict[str, Any] = {
-            "required_rooms": required_instances,
+            "required_rooms": required_rooms_counts,
             "room_specs": room_specs,
             "adjacency_rules": adjacency_rules,
             "area_rules": area_rules_list,
