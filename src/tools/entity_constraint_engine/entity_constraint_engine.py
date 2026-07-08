@@ -1,24 +1,49 @@
 import os
 import json
 import sys
+import logging
 from dotenv import load_dotenv
 from supabase import create_client, Client
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 class EntityConstraintEngine:
+    """
+    Execution layer for the constraint system. Reads per-entity rules (size, features,
+    adjacency) from the Supabase database and serves them to the Constraint Agent.
+    Acts as the single source of truth for both the Floor Plan Generator and the Verifier.
+    """
+
     def __init__(self):
+        """
+        Initializes the EntityConstraintEngine by connecting to Supabase.
+        Logs a warning if credentials are missing; does not raise so the
+        server can still start and return graceful errors per-request.
+
+        Args:
+            None
+        """
         supabase_url = os.environ.get("SUPABASE_URL")
         supabase_key = os.environ.get("SUPABASE_KEY")
         if not supabase_url or not supabase_key:
-            print("Warning: SUPABASE_URL or SUPABASE_KEY not set. Database queries will fail.")
+            logger.warning("SUPABASE_URL or SUPABASE_KEY not set. Database queries will fail.")
         else:
             self.supabase: Client = create_client(supabase_url, supabase_key)
+            logger.debug("Supabase client initialized successfully.")
 
     def get_entity_rules(self, entity_type: str, include_relations: bool = True) -> dict:
         """
         Retrieves the size rules (and optionally adjacency rules) for a specific entity.
         Returns a dictionary with the entity's constraints.
+
+        Args:
+            entity_type (str): The type of entity to fetch rules for (e.g., 'bedroom').
+            include_relations (bool): Whether to include adjacency/relational rules. Defaults to True.
+
+        Returns:
+            dict: A dictionary containing the entity's size_rules, feature_rules, and relational_rules.
         """
         if not hasattr(self, 'supabase'):
             return {"status": "no_data", "message": "Supabase client not initialized."}
@@ -27,7 +52,7 @@ class EntityConstraintEngine:
         try:
             response = self.supabase.table("entity_specs").select("*").eq("entity_type", entity_type).execute()
         except Exception as e:
-            print(f"Error querying Supabase entity_specs: {e}")
+            logger.error(f"Error querying Supabase entity_specs: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
             
         if not response.data:
@@ -77,7 +102,7 @@ class EntityConstraintEngine:
                         rule["description"] = rel_row.get("description")
                     relational_rules.append(rule)
             except Exception as e:
-                print(f"Error querying Supabase adjacency_rules: {e}")
+                logger.error(f"Error querying Supabase adjacency_rules: {e}", exc_info=True)
                 
         area_rules_json = row.get("area_rules_json")
         
@@ -89,6 +114,7 @@ class EntityConstraintEngine:
             
         return {
             "entity_type": entity_type,
+            "version": "v1",
             "size_rules": size_rules,
             "feature_rules": feature_rules,
             "relational_rules": relational_rules,
@@ -100,27 +126,41 @@ class EntityConstraintEngine:
         Retrieves the size rules (and optionally adjacency rules) for a list of entities.
         Filters the adjacency rules so they only link the requested entities, dropping extras.
         Returns a dictionary mapping entity_type to its constraints.
+
+        Args:
+            entities (list): A list of entity type strings to fetch rules for.
+            include_relations (bool): Whether to include adjacency/relational rules. Defaults to True.
+
+        Returns:
+            dict: A mapping of entity_type to its full ruleset dictionary.
         """
         result = {}
         for entity in entities:
+            logger.debug(f"Fetching rules for entity: '{entity}'")
             res = self.get_entity_rules(entity, include_relations)
             if res.get("status") != "no_data":
                 # Filter out relations pointing to entities outside the requested list
                 if include_relations and "relational_rules" in res:
+                    original_count = len(res["relational_rules"])
                     res["relational_rules"] = [
                         rule for rule in res["relational_rules"]
                         if rule["b"] in entities
                     ]
-                
+                    logger.debug(
+                        f"Entity '{entity}': filtered relational_rules from "
+                        f"{original_count} to {len(res['relational_rules'])} (kept only requested entities)"
+                    )
+
                 result[entity] = res
         return result
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     if len(sys.argv) < 2:
-        print("Usage: python3 entity_constraint_engine.py <entity_type> [entity_type2 ...]")
-        print("Example: python3 entity_constraint_engine.py bedroom")
-        print("         python3 entity_constraint_engine.py bedroom bathroom kitchen")
-        print("         python3 entity_constraint_engine.py all")
+        logger.info("Usage: python3 entity_constraint_engine.py <entity_type> [entity_type2 ...]")
+        logger.info("Example: python3 entity_constraint_engine.py bedroom")
+        logger.info("         python3 entity_constraint_engine.py bedroom bathroom kitchen")
+        logger.info("         python3 entity_constraint_engine.py all")
         sys.exit(1)
         
     engine = EntityConstraintEngine()
@@ -136,7 +176,7 @@ if __name__ == "__main__":
                 res = engine.supabase.table("entity_specs").select("entity_type").execute()
                 entities = [str(r["entity_type"]) for r in res.data if isinstance(r, dict)]
             except Exception as e:
-                print(f"Error fetching entities from Supabase: {e}")
+                logger.error(f"Error fetching entities from Supabase: {e}", exc_info=True)
         
         all_rules = {}
         for ent in entities:
@@ -146,18 +186,18 @@ if __name__ == "__main__":
         out_path = os.path.join(out_dir, filename)
         with open(out_path, 'w') as f:
             json.dump(all_rules, f, indent=2)
-        print(f"Success! Output saved to: Entity_Constraints/{filename}")
+        logger.info(f"Success! Output saved to: Entity_Constraints/{filename}")
         
     elif len(args) == 1:
         result = engine.get_entity_rules(args[0])
         if result.get("status") == "no_data":
-            print(f"Error: {result['message']}")
+            logger.error(f"Error: {result['message']}")
         else:
             filename = f"{args[0]}.json"
             out_path = os.path.join(out_dir, filename)
             with open(out_path, 'w') as f:
                 json.dump(result, f, indent=2)
-            print(f"Success! Output saved to: Entity_Constraints/{filename}")
+            logger.info(f"Success! Output saved to: Entity_Constraints/{filename}")
             
     else:
         multi_rules = {}
@@ -168,4 +208,4 @@ if __name__ == "__main__":
         out_path = os.path.join(out_dir, filename)
         with open(out_path, 'w') as f:
             json.dump(multi_rules, f, indent=2)
-        print(f"Success! Output saved to: Entity_Constraints/{filename}")
+        logger.info(f"Success! Output saved to: Entity_Constraints/{filename}")

@@ -1,6 +1,9 @@
 import os
 import json
 import warnings
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Suppress the google.generativeai deprecation warning
 with warnings.catch_warnings():
@@ -14,6 +17,12 @@ def parse_user_constraints(text: str) -> dict:
     """
     Parses unstructured natural language text from the user and outputs
     a structured JSON dictionary with required_rooms and room_overrides.
+
+    Args:
+        text (str): The unstructured natural language text provided by the user.
+
+    Returns:
+        dict: A structured dictionary containing parsed constraints like required_instances, room_overrides, etc.
     """
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -101,5 +110,5 @@ def parse_user_constraints(text: str) -> dict:
         )
         return json.loads(response.text)
     except Exception as e:
-        print(f"LLM Parsing Error: {e}")
+        logger.error(f"LLM Parsing Error: {e}", exc_info=True)
         return {}

@@ -4,6 +4,9 @@ from typing import Any
 from dotenv import load_dotenv
 from supabase import create_client, Client
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .validator import ConstraintValidator
 
@@ -11,6 +14,12 @@ load_dotenv()
 
 
 class ConstraintAgent:
+    """
+    Manages and serves the master ruleset for the multi-agent building design system.
+    Fetches per-entity constraints from the Entity Constraint Engine, applies
+    per-jurisdiction overrides from the Zoning Agent, and returns a single unified
+    constraint schema consumed by both the Generator and Verifier agents.
+    """
     DEFAULT_DESCRIPTIONS = {
         "front_setback_ft": "Minimum front property line setback in feet.",
         "rear_setback_ft": "Minimum rear property line setback in feet.",
@@ -46,20 +55,36 @@ class ConstraintAgent:
     # We will dynamically add keys fetched from style_rules to SOFT_KEYS
 
     def __init__(self, entity_engine_url=None):
+        """
+        Initializes the ConstraintAgent with a Supabase client and the Entity Constraint Engine URL.
+
+        Args:
+            entity_engine_url (str | None): URL for the Entity Constraint Engine API.
+                Defaults to the ENTITY_ENGINE_URL environment variable, falling back to localhost:8001.
+        """
         self.entity_engine_url = entity_engine_url or os.environ.get("ENTITY_ENGINE_URL", "http://localhost:8001")
-        
+        logger.debug(f"ConstraintAgent initialized with entity_engine_url={self.entity_engine_url}")
+
         supabase_url = os.environ.get("SUPABASE_URL")
         supabase_key = os.environ.get("SUPABASE_KEY")
         if not supabase_url or not supabase_key:
-            print("Warning: SUPABASE_URL or SUPABASE_KEY not set. Database queries will fail.")
+            logger.warning("SUPABASE_URL or SUPABASE_KEY not set. Database queries will fail.")
         else:
             self.supabase: Client = create_client(supabase_url, supabase_key)
+            logger.debug("Supabase client initialized successfully.")
         
     def process_zoning_input(self, data: dict, user_text: str | None = None) -> dict:
         """
         Takes raw JSON from the location/zoning agent, plus optional user override text,
         and translates it into our standard constraint schema.
         Also validates impossible constraints before proceeding.
+
+        Args:
+            data (dict): The raw JSON payload from the location/zoning agent containing zoning data.
+            user_text (str | None): Optional natural language text describing user preferences. Defaults to None.
+
+        Returns:
+            dict: The final unified constraint schema dictionary.
         """
         # 0. Parse user constraints via LLM if provided
         parsed_user_constraints = {}
@@ -74,7 +99,7 @@ class ConstraintAgent:
                 from src.agents.constraints.llm_parser import parse_user_constraints
                 parsed_user_constraints = parse_user_constraints(user_text)
             except Exception as e:
-                print(f"Failed to parse user_constraints with LLM: {e}")
+                logger.error(f"Failed to parse user_constraints with LLM: {e}", exc_info=True)
 
         # 1. Validate constraints before doing heavy lifting
         # Pass the parsed dictionary to the validator
@@ -135,6 +160,15 @@ class ConstraintAgent:
         Generates the full constraint JSON for a given jurisdiction.
         Optionally applies overrides (e.g., from user preferences via Planner Agent).
         Returns the final JSON schema.
+
+        Args:
+            jurisdiction_name (str): The name of the jurisdiction (e.g., "Seattle_WA").
+            overrides (dict | None): Optional dictionary of overrides to apply to exterior/interior constraints. Defaults to None.
+            zone (str | None): Optional zoning code (e.g., "LR3"). Defaults to None.
+            parsed_user_constraints (dict | None): Optional structured dictionary of parsed user constraints. Defaults to None.
+
+        Returns:
+            dict: The final JSON schema representing all constraints for the design.
         """
         def assign_level(k):
             # Dynamic checking
@@ -200,7 +234,7 @@ class ConstraintAgent:
                 if "requested_styles" in parsed and isinstance(parsed["requested_styles"], list):
                     user_requested_styles = parsed["requested_styles"]
             except Exception as e:
-                print(f"Failed to process user_constraints: {e}")
+                logger.error(f"Failed to process user_constraints: {e}", exc_info=True)
         
         room_specs: dict[str, Any] = {}
         descriptions = {}
@@ -232,6 +266,7 @@ class ConstraintAgent:
         
         # 1. Fetch specifications for all required base entities in a single batch request
         if base_types_needed:
+            logger.debug(f"Fetching rules for base entity types: {base_types_needed}")
             try:
                 # Sync HTTP request to the internal engine
                 response = httpx.post(
@@ -286,10 +321,10 @@ class ConstraintAgent:
                             # Prevent duplicates since we might process the same base type twice? No, we are iterating batch_data.items()
                             if rule_copy not in area_rules_list:
                                 area_rules_list.append(rule_copy)
-                else:
-                    print(f"Warning: Could not fetch constraints for entities: {base_types_needed}")
+                if base_types_needed:
+                    logger.warning(f"Could not fetch constraints for entities: {base_types_needed}")
             except Exception as e:
-                print(f"Error calling Entity Constraint Engine API: {e}")
+                logger.error(f"Error calling Entity Constraint Engine API: {e}", exc_info=True)
                     
         # Now append all user adjacency overrides to adjacency_rules
         for u_adj in user_adjacency_overrides:
@@ -344,7 +379,7 @@ class ConstraintAgent:
                         if desc:
                             descriptions[key] = desc
             except Exception as e:
-                print(f"Error querying Supabase zone_rules: {e}")
+                logger.error(f"Error querying Supabase zone_rules: {e}", exc_info=True)
                 
         # Inject user descriptions
         if user_descriptions:
@@ -373,7 +408,7 @@ class ConstraintAgent:
                         if desc:
                             descriptions[key] = desc
             except Exception as e:
-                print(f"Error querying Supabase style_rules: {e}")
+                logger.error(f"Error querying Supabase style_rules: {e}", exc_info=True)
             
         # 3. Apply Overrides (if any)
         if overrides:
@@ -429,6 +464,7 @@ class ConstraintAgent:
 
         final_schema = {
             "jurisdiction": jurisdiction_name,
+            "version": "v1",
             "source": source,
             "status": status,
             "tolerance_ft": tolerance_ft,
@@ -464,7 +500,7 @@ class ConstraintAgent:
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
-        print("Usage: python3 constraint_agent.py <zoning_json_file>")
+        logger.info("Usage: python3 constraint_agent.py <zoning_json_file>")
         sys.exit(1)
         
     zoning_file = sys.argv[1]
@@ -475,6 +511,6 @@ if __name__ == "__main__":
             
         agent = ConstraintAgent()
         final_schema = agent.process_zoning_input(zoning_data)
-        print(json.dumps(final_schema, indent=2))
+        logger.info(json.dumps(final_schema, indent=2))
     except Exception as e:
-        print(f"Error running Constraint Agent: {e}")
+        logger.error(f"Error running Constraint Agent: {e}", exc_info=True)

@@ -1,14 +1,31 @@
 import argparse
 import sys
 import os
+import logging
 from .parser import parse_input_json
 from .core_engine import DXFEngine
 from .renderer import render_preview
 from .dimensioning import format_feet_inches
 
-def generate_dxf(json_paths: list, out_dxf: str, render: bool = False, out_img_prefix: str = ""):
+logger = logging.getLogger(__name__)
+
+def generate_dxf(json_paths: list, out_dxf: str, render: bool = False, out_img_prefix: str = "") -> None:
+    """
+    Generates a DXF file from one or more input JSON layout files.
+    Optionally renders a PNG preview of the generated DXF.
+
+    Args:
+        json_paths (list): List of paths to input JSON files.
+        out_dxf (str): Path to the output DXF file.
+        render (bool): Whether to generate matplotlib preview images. Defaults to False.
+        out_img_prefix (str): Prefix for the rendered preview image files. Defaults to "".
+
+    Returns:
+        None
+    """
     engine = DXFEngine()
-    
+    logger.debug(f"Starting DXF generation for {len(json_paths)} input file(s). Output: {out_dxf}")
+
     combined_ir = {"metadata": {"type": "combined"}, "views": []}
     
     for json_path in json_paths:
@@ -54,12 +71,12 @@ def generate_dxf(json_paths: list, out_dxf: str, render: bool = False, out_img_p
                 )
                 
     engine.save(out_dxf)
-    print(f"DXF saved to {out_dxf}")
+    logger.info(f"DXF saved to {out_dxf}")
     
     if render:
         prefix = out_img_prefix if out_img_prefix else out_dxf.replace(".dxf", "")
         render_preview(combined_ir, prefix)
-        print(f"Rendered previews saved with prefix {prefix}")
+        logger.info(f"Rendered previews saved with prefix {prefix}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="DXF Generator")

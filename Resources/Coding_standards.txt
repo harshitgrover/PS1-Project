@@ -1,0 +1,7 @@
+Coding standards laid down for the whole team:
+  1. Self-explanatory names for all variables, functions, classes, and objects
+  2. Every class and function must have a docstring; all input args and return values documented with data types
+  3. Follow PEP 8 formatting guidelines for Python
+  4. Add unit tests for individual functions
+  5. Use Python logging library (not print); implement all log levels (debug, info, error, etc.)
+  6. Use try/except generously; always log errors with logger.error and raise/traceback so the failing line is identifiable

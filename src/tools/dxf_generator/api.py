@@ -6,10 +6,24 @@ import os
 import uuid
 import json
 import boto3
+import logging
 
 from src.tools.dxf_generator.dxf_generator import generate_dxf
 
+# ── MONITORING IMPORTS ─────────────────────────────────────────────
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="DXF Generator API")
+
+Instrumentator().instrument(app).expose(app)
+
+REQUEST_COUNT = Counter("agent_requests_total", "Total requests", ["agent_name", "status"])
+INFERENCE_LATENCY = Histogram("agent_inference_latency_seconds", "Time per /run request")
+MODEL_ERROR_COUNT = Counter("agent_model_errors_total", "LLM/solver errors", ["agent_name", "error_type"])
 
 class FileRef(BaseModel):
     type: str
@@ -22,22 +36,51 @@ class DXFRequest(BaseModel):
     file_refs: Optional[List[FileRef]] = []
 
 def cleanup_files(*file_paths):
+    """
+    Removes temporary local files after they have been uploaded to S3.
+    Silently ignores files that do not exist or cannot be deleted.
+
+    Args:
+        *file_paths (str): Variable number of file path strings to delete.
+
+    Returns:
+        None
+    """
     for path in file_paths:
         try:
             if path and os.path.exists(path):
                 os.remove(path)
+                logger.debug(f"Cleaned up temporary file: {path}")
         except Exception:
             pass
 
 @app.get("/health")
-def health_check():
-    return {"status": "ok"}
+def health_check() -> dict:
+    """
+    Returns the health status of the agent.
+
+    Args:
+        None
+
+    Returns:
+        dict: A dictionary containing the status and agent name.
+    """
+    return {"status": "ok", "agent": "dxf_generator"}
 
 @app.post("/api/v1/generate_dxf")
-def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks):
+@app.post("/run")
+@INFERENCE_LATENCY.time()
+def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks) -> dict:
     """
     Synchronously generates a DXF file (and PNG if render is True) from the input JSON data,
     uploads to S3, and returns the file reference(s).
+
+    Args:
+        request (DXFRequest): The incoming request payload containing the layout output.
+        background_tasks (BackgroundTasks): FastAPI background tasks manager for cleanup.
+
+    Returns:
+        dict: A dictionary containing the session_id, status, file_refs, and properties.
     """
     try:
         temp_dir = tempfile.gettempdir()
@@ -93,6 +136,7 @@ def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks
         # Clean up local files
         background_tasks.add_task(cleanup_files, *cleanup_list)
         
+        REQUEST_COUNT.labels(agent_name="dxf_generator", status="success").inc()
         return {
             "session_id": request.session_id,
             "status": "success",
@@ -102,16 +146,18 @@ def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks
             }
         }
         
+    except HTTPException:
+        REQUEST_COUNT.labels(agent_name="dxf_generator", status="error").inc()
+        raise
     except Exception as e:
-        print(f"Error generating DXF for {request.session_id}: {e}")
-        return {
-            "session_id": request.session_id,
-            "status": "failed",
-            "file_refs": [],
-            "Properties": {
-                "error_message": str(e)
-            }
-        }
+        REQUEST_COUNT.labels(agent_name="dxf_generator", status="error").inc()
+        MODEL_ERROR_COUNT.labels(agent_name="dxf_generator", error_type=type(e).__name__).inc()
+        logger.error(f"Error generating DXF for {request.session_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={
+            "error_message": str(e),
+            "agent": "dxf_generator",
+            "status": "error"
+        })
 
 if __name__ == "__main__":
     import uvicorn

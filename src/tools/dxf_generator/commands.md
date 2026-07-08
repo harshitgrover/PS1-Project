@@ -1,56 +1,151 @@
-# DXF Generator Commands
+# DXF Generator — Commands & Testing Guide
 
-## CLI Usage
+---
 
-The DXF Generator can ingest one or *multiple* JSON files simultaneously. If you pass multiple files, they will be combined into a single, perfectly layered DXF (e.g., overlapping a site plan and floor plan).
+## 1. Run the API Server
 
-> **Universal JSON Fallback**: The parser has been upgraded to automatically detect and extract geometric data (2D coordinate arrays like `[[x,y], [x,y]]`) from **any** JSON structure, even if it doesn't match a known schema (e.g. raw GeoJSON). It will dynamically assign layer names based on the keys where it found the coordinates!
-
-**Generate a Single DXF:**
-```bash
-python3 -m src.tools.dxf_generator.dxf_generator src/tools/dxf_generator/demo_inputs/floor_plan.json floor_plan.dxf
-```
-
-**Generate a Combined DXF (Multiple Inputs):**
-```bash
-python3 -m src.tools.dxf_generator.dxf_generator src/tools/dxf_generator/demo_inputs/site_plan.json src/tools/dxf_generator/demo_inputs/floor_plan.json combined_plan.dxf
-```
-
-> **Automatic File Routing:** If you specify a simple filename for the output (like `floor_plan.dxf` above) instead of an absolute path, the engine will automatically create a `generated_files/` folder inside the tool directory and cleanly save all `.dxf` and `.png` outputs there!
-
-**Generate with Visual Preview:**
-Add the `--render` flag to automatically generate a rich, color-coded `matplotlib` PNG preview alongside the DXF output.
+Start the FastAPI server (defaults to port 8003):
 
 ```bash
-python3 -m src.tools.dxf_generator.dxf_generator src/tools/dxf_generator/demo_inputs/floor_plan.json floor_plan.dxf --render
+# From project root
+python3 -m src.tools.dxf_generator.api
 ```
 
-**Custom Prefix for Renders:**
-```bash
-python3 -m src.tools.dxf_generator.dxf_generator src/tools/dxf_generator/demo_inputs/floor_plan.json floor_plan.dxf --render --img-prefix custom_prefix
-```
+---
 
-## API Usage
+## 2. Endpoints
 
-Start the synchronous FastAPI endpoint on port `8002`:
+| Method | URL | Description |
+|--------|-----|-------------|
+| `GET`  | `/health` | Health check — confirms server is alive |
+| `GET`  | `/metrics` | Prometheus metrics (auto-exposed) |
+| `POST` | `/run` | Main endpoint — generate DXF and upload to S3 |
+| `POST` | `/api/v1/generate_dxf` | Alias for `/run` |
 
+---
+
+## 3. Manual Testing (cURL)
+
+**Step 1 — Start the server:**
 ```bash
 python3 -m src.tools.dxf_generator.api
 ```
 
-### Endpoints
-
-- **`GET /health`**: Health check.
-- **`POST /api/v1/generate_dxf`**: Send a JSON payload containing `data` (the plan structure) and optionally `render_preview` (boolean). The endpoint will synchronously return the generated `.dxf` file as an `application/dxf` binary attachment.
-
-### How to Call the API
-
-Once the server is running (`python3 -m src.tools.dxf_generator.api`), another agent or script can call it to get a DXF file.
-
-#### Using cURL:
+**Step 2 — Health check:**
 ```bash
-curl -X POST "http://localhost:8002/api/v1/generate_dxf" \
-     -H "Content-Type: application/json" \
-     -d '{"data": {"job_id": "test", "boundary": [[0,0], [10,0], [10,10], [0,10]]}}' \
-     --output my_generated_file.dxf
+curl http://localhost:8003/health
+# Expected: {"status": "ok", "agent": "dxf_generator"}
 ```
+
+**Step 3 — Check metrics:**
+```bash
+curl http://localhost:8003/metrics
+# Expected: text starting with "# HELP"
+```
+
+**Step 4 — Call /run with a layout payload:**
+```bash
+curl -X POST "http://localhost:8003/run" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "session_id": "test_001",
+       "Properties": {
+         "layout_output": {
+           "views": [
+             {
+               "view_id": "floor_plan",
+               "layers": [{"name": "Walls", "color": 7}],
+               "entities": [
+                 {
+                   "type": "polygon",
+                   "layer": "Walls",
+                   "points": [[0,0],[10,0],[10,10],[0,10]],
+                   "closed": true,
+                   "auto_dimension": true
+                 },
+                 {
+                   "type": "label",
+                   "layer": "Walls",
+                   "text": "Living Room",
+                   "position": [5, 5],
+                   "height": 0.5
+                 }
+               ]
+             }
+           ]
+         },
+         "render_preview": false,
+         "iteration_number": 1
+       },
+       "file_refs": []
+     }'
+```
+
+**Step 5 — Verify metrics updated:**
+```bash
+curl http://localhost:8003/metrics | grep agent_requests_total
+# Expected: agent_requests_total{agent_name="dxf_generator",status="success"} 1.0
+```
+
+---
+
+## 4. Automated Unit Tests (Test Script)
+
+Run from the **project root** using the virtual environment:
+
+```bash
+source venv/bin/activate
+python -m unittest src/tools/dxf_generator/test_dxf_generator.py -v
+```
+
+**What each test checks:**
+- `test_health_check_returns_ok` — `/health` returns 200 with correct body
+- `test_run_endpoint_exists` — `/run` route is registered (not 404)
+- `test_cleanup_removes_existing_file` — `cleanup_files` deletes a real temp file
+- `test_cleanup_ignores_nonexistent_file` — `cleanup_files` does not raise on missing files
+- `test_cleanup_handles_multiple_files` — `cleanup_files` handles several paths at once
+- `test_cleanup_handles_none_path` — `cleanup_files` silently skips `None` and empty strings
+- `test_generate_dxf_produces_output_file` — End-to-end: a valid JSON produces a real `.dxf` file
+- `test_generate_dxf_is_deterministic` — Same input always produces the same output size (no LLM)
+
+---
+
+## 5. CLI Usage
+
+The DXF Generator can also be run directly from the command line without the API server.
+
+> **Universal JSON Fallback**: The parser automatically detects and extracts geometric data from any JSON structure, even if it doesn't match the standard schema.
+
+**Generate a single DXF:**
+```bash
+python3 -m src.tools.dxf_generator.dxf_generator \
+    src/tools/dxf_generator/demo_inputs/floor_plan.json \
+    floor_plan.dxf
+# Output saved to: src/tools/dxf_generator/generated_files/floor_plan.dxf
+```
+
+**Generate a combined DXF from multiple inputs:**
+```bash
+python3 -m src.tools.dxf_generator.dxf_generator \
+    src/tools/dxf_generator/demo_inputs/site_plan.json \
+    src/tools/dxf_generator/demo_inputs/floor_plan.json \
+    combined_plan.dxf
+```
+
+**Generate with a visual PNG preview:**
+```bash
+python3 -m src.tools.dxf_generator.dxf_generator \
+    src/tools/dxf_generator/demo_inputs/floor_plan.json \
+    floor_plan.dxf \
+    --render
+```
+
+**Custom prefix for rendered images:**
+```bash
+python3 -m src.tools.dxf_generator.dxf_generator \
+    src/tools/dxf_generator/demo_inputs/floor_plan.json \
+    floor_plan.dxf \
+    --render --img-prefix my_preview
+```
+
+> **Auto File Routing**: If you give a plain filename (not a full path) as output, files are automatically saved to `generated_files/` inside the tool directory.

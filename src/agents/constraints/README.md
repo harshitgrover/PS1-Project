@@ -17,12 +17,13 @@ The Constraint Agent serves as the "Master Rules Aggregator" for the generative 
   - `interior`: Contains dictionaries for each room, listing `size_rules`, `feature_rules`, and `relational_rules`.
 
 ## Directory Structure
-- `constraint_agent.py`: The core aggregator and logic pipeline.
-- `api.py`: FastAPI server exposing the agent over HTTP.
+- `constraint_agent.py`: Core aggregator and logic pipeline.
+- `api.py`: FastAPI server exposing the agent over HTTP (port 8002). Includes `/health`, `/run`, `/metrics`.
 - `llm_parser.py`: Natural language processing logic using Google Gemini.
-- `extract_file.py`: Utility script to quickly extract generated JSON payloads from the database into the `json_files` folder.
-- `db.py` & `demodb.py`: Database initialization and seeding scripts.
-- `database.db`: The unified local SQLite database holding all rules and agent outputs.
+- `validator.py`: Pre-flight constraint validation logic.
+- `test_constraint_agent.py`: Unit tests for this module (run with `python -m unittest`).
+- `json_files/`: Demo zoning JSON payloads for manual testing.
+- `user_constraints.txt`: Optional file for natural language overrides (read automatically if present).
 
-## Commands & API Integration
-For all CLI execution scripts, database initialization commands, and API server instructions, please refer to [commands.md](commands.md).
+## Testing & Commands
+For CLI usage, unit test commands, manual cURL tests, and API server instructions, please refer to [commands.md](commands.md).
