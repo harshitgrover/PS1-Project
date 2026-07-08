@@ -8,6 +8,7 @@ Start the FastAPI server (defaults to port 8003):
 
 ```bash
 # From project root
+source venv/bin/activate
 python3 -m src.tools.dxf_generator.api
 ```
 
@@ -28,6 +29,7 @@ python3 -m src.tools.dxf_generator.api
 
 **Step 1 — Start the server:**
 ```bash
+source venv/bin/activate
 python3 -m src.tools.dxf_generator.api
 ```
 

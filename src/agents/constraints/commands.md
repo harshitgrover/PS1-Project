@@ -7,6 +7,7 @@
 Seed/reset the rules database in Supabase (run once from project root):
 
 ```bash
+source venv/bin/activate
 python3 src/supabase_seed.py
 ```
 
@@ -18,6 +19,7 @@ Start the FastAPI server (defaults to port 8002):
 
 ```bash
 # From project root
+source venv/bin/activate
 python3 -m src.agents.constraints.api
 ```
 
@@ -38,6 +40,7 @@ python3 -m src.agents.constraints.api
 
 **Step 1 — Start the server:**
 ```bash
+source venv/bin/activate
 python3 -m src.agents.constraints.api
 ```
 
