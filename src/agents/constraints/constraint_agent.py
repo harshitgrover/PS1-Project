@@ -88,11 +88,6 @@ class ConstraintAgent:
         """
         # 0. Parse user constraints via LLM if provided
         parsed_user_constraints = {}
-        if not user_text:
-            user_constraints_file = os.path.join(os.path.dirname(__file__), "user_constraints.txt")
-            if os.path.exists(user_constraints_file):
-                with open(user_constraints_file, "r") as f:
-                    user_text = f.read().strip()
 
         if user_text:
             try:
