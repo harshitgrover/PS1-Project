@@ -108,7 +108,21 @@ def parse_user_constraints(text: str) -> dict:
                 response_mime_type="application/json"
             )
         )
-        return json.loads(response.text)
+        text_resp = response.text.strip()
+        if text_resp.startswith("```json"):
+            text_resp = text_resp[7:]
+        if text_resp.startswith("```"):
+            text_resp = text_resp[3:]
+        if text_resp.endswith("```"):
+            text_resp = text_resp[:-3]
+        text_resp = text_resp.strip()
+        
+        start = text_resp.find('{')
+        end = text_resp.rfind('}')
+        if start != -1 and end != -1:
+            text_resp = text_resp[start:end+1]
+            
+        return json.loads(text_resp)
     except Exception as e:
         logger.error(f"LLM Parsing Error: {e}", exc_info=True)
         return {}

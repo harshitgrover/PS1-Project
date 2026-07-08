@@ -317,9 +317,12 @@ class ConstraintAgent:
                     for base, ent_data in batch_data.items():
                         # Store any adjacency rules
                         for rel in ent_data.get("relational_rules", []):
-                            # The base rules use base types (e.g. "bedroom", "bathroom").
-                            # Since we operate on instances, we could map them. For now, keep as is.
-                            pass
+                            rule_copy = dict(rel)
+                            rule_copy["level"] = assign_level(f"{rule_copy['a']}_{rule_copy['relation']}_{rule_copy['b']}")
+                            # Add a flag so downstream engines know this is a base-type generic rule, not an instance override
+                            rule_copy["is_base_rule"] = True
+                            if rule_copy not in adjacency_rules:
+                                adjacency_rules.append(rule_copy)
                                 
                         # Store any area rules
                         for a_rule in ent_data.get("area_rules", []):
