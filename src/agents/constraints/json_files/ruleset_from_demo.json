@@ -126,7 +126,75 @@
                         "entity_type": "kitchen"
                     }
                 },
-                "adjacency_rules": [],
+                "adjacency_rules": [
+                    {
+                        "a": "kitchen",
+                        "b": "bathroom",
+                        "relation": "must_not_touch",
+                        "description": "Bathroom must not share a wall with the kitchen.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "kitchen",
+                        "b": "bedroom",
+                        "relation": "must_not_touch",
+                        "description": "Kitchen should not share a wall with a bedroom.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "bathroom",
+                        "b": "bedroom",
+                        "relation": "ensuite_required",
+                        "min_shared_wall_ft": 4,
+                        "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "bathroom",
+                        "b": "kitchen",
+                        "relation": "must_not_touch",
+                        "description": "Bathroom must not share a wall with the kitchen.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "bathroom",
+                        "b": "bathroom",
+                        "relation": "must_not_touch",
+                        "description": "Bathrooms must not share a wall with each other.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "bedroom",
+                        "b": "bathroom",
+                        "relation": "ensuite_required",
+                        "min_shared_wall_ft": 4,
+                        "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "bedroom",
+                        "b": "kitchen",
+                        "relation": "must_not_touch",
+                        "description": "Kitchen should not share a wall with a bedroom.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    },
+                    {
+                        "a": "bedroom",
+                        "b": "bathroom",
+                        "relation": "distance_limit",
+                        "max_dist_ft": 25,
+                        "description": "Bedroom to Bathroom must be < 25 ft.",
+                        "level": "hard",
+                        "is_base_rule": true
+                    }
+                ],
                 "area_rules": [
                     {
                         "rule": "bathroom_lt_served_bedroom",

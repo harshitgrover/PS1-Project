@@ -220,8 +220,18 @@ class ConstraintAgent:
             try:
                 parsed = parsed_user_constraints
                 if "required_instances" in parsed and isinstance(parsed["required_instances"], list):
-                    # Replace defaults entirely if the user explicitly provided instances
-                    required_instances = parsed["required_instances"]
+                    # Smart merge: if user specifies a base type (e.g. bedroom), replace defaults for THAT base type.
+                    # Keep defaults for base types the user didn't mention (e.g. kitchen).
+                    user_instances = parsed["required_instances"]
+                    user_base_types = set([inst.rsplit('_', 1)[0] for inst in user_instances])
+                    
+                    final_instances = list(user_instances)
+                    for default_inst in required_instances:
+                        base = default_inst.rsplit('_', 1)[0]
+                        if base not in user_base_types:
+                            final_instances.append(default_inst)
+                            
+                    required_instances = final_instances
                 if "excluded_base_types" in parsed and isinstance(parsed["excluded_base_types"], list):
                     excluded = set(parsed["excluded_base_types"])
                     # Remove any default instances whose base type is excluded
