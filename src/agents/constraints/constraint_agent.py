@@ -35,7 +35,19 @@ class ConstraintAgent:
         "min_area_fraction_of_max": "Minimum percentage of the maximum allowed footprint that must be built.",
         "tree_protection_zone": "GeoJSON boundaries for protected trees that cannot be built over.",
         "building_file": "File path to the existing building geometry (if any).",
-        "geometry_file": "File path to the raw lot geometry."
+        "geometry_file": "File path to the raw lot geometry.",
+        "min_area_ft2": "Minimum allowed floor area for the room in square feet.",
+        "min_side_ft": "Minimum length of any single wall in the room.",
+        "max_side_ft": "Maximum length of any single wall in the room.",
+        "min_aspect_ratio": "Minimum allowed aspect ratio (length/width) for the room.",
+        "max_aspect_ratio": "Maximum allowed aspect ratio (length/width) for the room.",
+        "habitable": "Whether the room is classified as habitable space (requires specific climate/egress codes).",
+        "requires_exterior_window": "Whether the room requires at least one exterior window.",
+        "requires_egress": "Whether the room requires emergency escape and rescue openings (egress).",
+        "ventilation_type": "The required type of ventilation (natural, mechanical, etc.).",
+        "requires_door": "Whether the room requires a door.",
+        "requires_closet": "Whether the room requires a built-in closet.",
+        "entity_type": "The base semantic category of the room (e.g. bedroom, kitchen)."
     }
 
     LEGAL_KEYS = {
@@ -421,6 +433,16 @@ class ConstraintAgent:
                 else:
                     readable = key.replace("_", " ").capitalize()
                     descriptions[key] = f"Dynamic zoning constraint: {readable}."
+                    
+        # Ensure default descriptions are added for interior room specs
+        for room, specs in room_specs.items():
+            for key in specs.keys():
+                if key not in descriptions:
+                    if key in self.DEFAULT_DESCRIPTIONS:
+                        descriptions[key] = self.DEFAULT_DESCRIPTIONS[key]
+                    else:
+                        readable = key.replace("_", " ").capitalize()
+                        descriptions[key] = f"Dynamic interior constraint: {readable}."
 
         # Ensure constraint_levels are assigned
         constraint_levels = {}
