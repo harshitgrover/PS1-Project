@@ -75,6 +75,26 @@ curl -X POST "http://localhost:8002/run" \
      }'
 ```
 
+**Step 4b — Save output directly to a JSON file in `json_files/`:**
+```bash
+curl -s -X POST "http://localhost:8002/run" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "session_id": "test_001",
+       "Properties": {
+         "location_zoning_output": {
+           "jurisdiction": "Redmond, WA",
+           "zone_code": "OBAT",
+           "offsets": {"front": 20, "rear": 15, "side": 5},
+           "max_lot_coverage_pct": 40
+         },
+         "user_constraints": "I want 3 bedrooms and 2 bathrooms"
+       },
+       "file_refs": []
+     }' | python3 -m json.tool > src/agents/constraints/json_files/ruleset_redmond_obat.json
+```
+*(The `-s` flag silences curl's progress bar. `python3 -m json.tool` pretty-prints the JSON before saving.)*
+
 **Step 5 — Verify metrics updated:**
 ```bash
 curl http://localhost:8002/metrics | grep agent_requests_total

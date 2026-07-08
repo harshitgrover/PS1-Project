@@ -52,12 +52,29 @@ curl -X POST "http://localhost:8001/run" \
      -d '{"entities": ["bedroom"], "include_relations": true}'
 ```
 
+**Step 4b — Save single entity output to `Entity_Constraints/`:**
+```bash
+curl -s -X POST "http://localhost:8001/run" \
+     -H "Content-Type: application/json" \
+     -d '{"entities": ["bedroom"], "include_relations": true}' \
+     | python3 -m json.tool > src/tools/entity_constraint_engine/Entity_Constraints/bedroom.json
+```
+
 **Step 5 — Fetch rules for multiple entities (as the Constraint Agent does):**
 ```bash
 curl -X POST "http://localhost:8001/api/v1/entity_constraints" \
      -H "Content-Type: application/json" \
      -d '{"entities": ["bedroom", "bathroom", "kitchen", "living", "corridor"], "include_relations": true}'
 ```
+
+**Step 5b — Save all entities output to `Entity_Constraints/`:**
+```bash
+curl -s -X POST "http://localhost:8001/api/v1/entity_constraints" \
+     -H "Content-Type: application/json" \
+     -d '{"entities": ["bedroom", "bathroom", "kitchen", "living", "dining", "corridor", "laundry", "garage", "balcony"], "include_relations": true}' \
+     | python3 -m json.tool > src/tools/entity_constraint_engine/Entity_Constraints/all_entities.json
+```
+*(The `-s` flag silences curl's progress bar. `python3 -m json.tool` pretty-prints the JSON before saving.)*
 
 **Step 6 — Verify metrics updated after the call:**
 ```bash
