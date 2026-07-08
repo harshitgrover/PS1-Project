@@ -56,26 +56,7 @@ curl http://localhost:8002/metrics | grep agent_requests_total
 # Expected: lines starting with "# HELP agent_requests_total"
 ```
 
-**Step 4 — Call /run with a real zoning payload:**
-```bash
-curl -X POST "http://localhost:8002/run" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "session_id": "test_001",
-       "Properties": {
-         "location_zoning_output": {
-           "jurisdiction": "Redmond, WA",
-           "zone_code": "OBAT",
-           "offsets": {"front": 20, "rear": 15, "side": 5},
-           "max_lot_coverage_pct": 40
-         },
-         "user_constraints": "I want 3 bedrooms and 2 bathrooms"
-       },
-       "file_refs": []
-     }'
-```
-
-**Step 4b — Save output directly to a JSON file in `json_files/`:**
+**Step 4 — Call /run with a real zoning payload and save to JSON:**
 ```bash
 curl -s -X POST "http://localhost:8002/run" \
      -H "Content-Type: application/json" \
