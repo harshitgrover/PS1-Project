@@ -225,7 +225,11 @@ class ConstraintAgent:
         }
         
         # 2. Fetch Interior rules ONLY for required entities
-        # required_instances is already defined and smartly merged at the top
+        if parsed_user_constraints and "required_instances" in parsed_user_constraints:
+            required_instances = parsed_user_constraints["required_instances"]
+        else:
+            # Baseline minimums required for a valid layout
+            required_instances = ["bathroom_1", "bathroom_2", "bedroom_1", "bedroom_2", "living_1", "kitchen_1", "corridor_1"]
         
         # 2.1 Parse user constraints via LLM if provided
         room_overrides = {}
@@ -241,7 +245,8 @@ class ConstraintAgent:
                 parsed = parsed_user_constraints
                 print(f"DEBUG: parsed LLM output: {parsed}")
                 if "required_instances" in parsed and isinstance(parsed["required_instances"], list):
-                    required_instances = parsed["required_instances"]
+                    # It's already pulled above from parsed_user_constraints
+                    pass
                 if "room_overrides" in parsed and isinstance(parsed["room_overrides"], dict):
                     room_overrides = parsed["room_overrides"]
                 if "global_exterior_overrides" in parsed and isinstance(parsed["global_exterior_overrides"], dict):
@@ -334,13 +339,11 @@ class ConstraintAgent:
                         # Store any adjacency rules
                         for rel in ent_data.get("relational_rules", []):
                             rule_copy = dict(rel)
-                            # Only include adjacency rules for entities that are actually required
-                            if rule_copy['a'] in base_types_needed and rule_copy['b'] in base_types_needed:
-                                rule_copy["level"] = assign_level(f"{rule_copy['a']}_{rule_copy['relation']}_{rule_copy['b']}")
-                                # Add a flag so downstream engines know this is a base-type generic rule, not an instance override
-                                rule_copy["is_base_rule"] = True
-                                if rule_copy not in adjacency_rules:
-                                    adjacency_rules.append(rule_copy)
+                            rule_copy["level"] = assign_level(f"{rule_copy['a']}_{rule_copy['relation']}_{rule_copy['b']}")
+                            # Add a flag so downstream engines know this is a base-type generic rule, not an instance override
+                            rule_copy["is_base_rule"] = True
+                            if rule_copy not in adjacency_rules:
+                                adjacency_rules.append(rule_copy)
                                 
                         # Store any area rules
                         for a_rule in ent_data.get("area_rules", []):

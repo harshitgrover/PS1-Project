@@ -140,7 +140,8 @@ class EntityConstraintEngine:
             res = self.get_entity_rules(entity, include_relations)
             if res.get("status") != "no_data":
                 # Filter out relations pointing to entities outside the requested list
-                if include_relations and "relational_rules" in res:
+                # ONLY if we requested multiple entities. If exactly 1 is requested, return all its relations.
+                if include_relations and "relational_rules" in res and len(entities) > 1:
                     original_count = len(res["relational_rules"])
                     res["relational_rules"] = [
                         rule for rule in res["relational_rules"]
