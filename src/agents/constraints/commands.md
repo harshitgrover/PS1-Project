@@ -15,15 +15,21 @@ python3 src/supabase_seed.py
 
 ## 2. Run the API Server
 
-Start the FastAPI server (defaults to port 8002):
+Start the Entity Constraint Engine (Dependency) on port 8001, and the Constraint Agent FastAPI server on port 8002. It's recommended to run these in separate terminal windows.
 
+**Window 1: Entity Constraint Engine**
 ```bash
 # From project root
 source venv/bin/activate
+# Optional: lsof -ti:8001 | xargs kill -9
+python3 -m src.tools.entity_constraint_engine.api
+```
 
-# Optional: if you get "address already in use" on port 8002, kill the existing process first:
-# lsof -ti:8002 | xargs kill -9
-
+**Window 2: Constraint Agent**
+```bash
+# From project root
+source venv/bin/activate
+# Optional: lsof -ti:8002 | xargs kill -9
 python3 -m src.agents.constraints.api
 ```
 
@@ -42,13 +48,17 @@ python3 -m src.agents.constraints.api
 
 ## 4. Manual Testing (cURL)
 
-**Step 1 — Start the server:**
+**Step 1 — Start the servers (in separate terminal windows):**
+
+**Window 1 (Entity Constraint Engine):**
 ```bash
 source venv/bin/activate
+python3 -m src.tools.entity_constraint_engine.api
+```
 
-# Optional: if you get "address already in use" on port 8002, kill the existing process first:
-# lsof -ti:8002 | xargs kill -9
-
+**Window 2 (Constraint Agent):**
+```bash
+source venv/bin/activate
 python3 -m src.agents.constraints.api
 ```
 
