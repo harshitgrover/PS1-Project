@@ -4,13 +4,15 @@
 
 ## 1. Setup & Initialization
 
-Seed/reset the rules database in Supabase (run once from project root):
+> [!NOTE]
+> **This has already been run.** You do not need to run this again unless you are setting up a completely fresh Supabase instance.
+
+The database schema and seed script are now managed by the **Entity Constraint Engine**. If you need to re-seed the rules database in Supabase, run:
 
 ```bash
 source venv/bin/activate
-python3 src/supabase_seed.py
+python3 src/tools/entity_constraint_engine/supabase_seed.py
 ```
-
 ---
 
 ## 2. Run the API Server

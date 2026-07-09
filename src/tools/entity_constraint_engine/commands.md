@@ -111,3 +111,21 @@ python3 -m src.tools.entity_constraint_engine.entity_constraint_engine bedroom b
 python3 -m src.tools.entity_constraint_engine.entity_constraint_engine all
 # Generates: src/tools/entity_constraint_engine/demo_outputs/all_entities.json
 ```
+
+---
+
+## 6. Database Setup (Supabase)
+
+> [!NOTE]
+> **This has already been run.** You do not need to run this again unless you are setting up a completely fresh Supabase instance.
+
+If you ever need to recreate the database tables or seed the initial data:
+
+**Step 1 — Create Tables (SQL Schema):**
+Run the `supabase_schema.sql` file directly in your Supabase SQL Editor.
+
+**Step 2 — Seed Initial Data:**
+Run the seed script from the project root. This connects to Supabase and uploads the base entity constraints.
+```bash
+python3 src/tools/entity_constraint_engine/supabase_seed.py
+```
