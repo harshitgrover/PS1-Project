@@ -169,7 +169,7 @@ if __name__ == "__main__":
     engine = EntityConstraintEngine()
     args = [arg.lower() for arg in sys.argv[1:]]
     
-    out_dir = os.path.join(os.path.dirname(__file__), 'json_files')
+    out_dir = os.path.join(os.path.dirname(__file__), 'demo_outputs')
     os.makedirs(out_dir, exist_ok=True)
     
     if "all" in args:
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         out_path = os.path.join(out_dir, filename)
         with open(out_path, 'w') as f:
             json.dump(all_rules, f, indent=2)
-        logger.info(f"Success! Output saved to: json_files/{filename}")
+        logger.info(f"Success! Output saved to: demo_outputs/{filename}")
         
     elif len(args) == 1:
         result = engine.get_entity_rules(args[0])
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             out_path = os.path.join(out_dir, filename)
             with open(out_path, 'w') as f:
                 json.dump(result, f, indent=2)
-            logger.info(f"Success! Output saved to: json_files/{filename}")
+            logger.info(f"Success! Output saved to: demo_outputs/{filename}")
             
     else:
         multi_rules = {}
@@ -211,4 +211,4 @@ if __name__ == "__main__":
         out_path = os.path.join(out_dir, filename)
         with open(out_path, 'w') as f:
             json.dump(multi_rules, f, indent=2)
-        logger.info(f"Success! Output saved to: json_files/{filename}")
+        logger.info(f"Success! Output saved to: demo_outputs/{filename}")

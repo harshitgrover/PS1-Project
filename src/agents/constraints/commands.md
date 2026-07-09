@@ -86,8 +86,8 @@ curl http://localhost:8002/metrics | grep agent_requests_total
 ```bash
 curl -s -X POST "http://localhost:8002/run" \
      -H "Content-Type: application/json" \
-     -d @src/agents/constraints/json_files/demo_input_1.json \
-     | python3 -m json.tool > src/agents/constraints/json_files/ruleset_redmond_obat.json
+     -d @src/agents/constraints/demo_inputs/demo_input_1.json \
+     | python3 -m json.tool > src/agents/constraints/demo_outputs/ruleset_redmond_obat.json
 ```
 *(The `-s` flag silences curl's progress bar. `python3 -m json.tool` pretty-prints the JSON before saving.)*
 
@@ -125,12 +125,12 @@ python -m unittest src/agents/constraints/test_constraint_agent.py -v
 
 Mock inputs pre-formatted into the centralized Agent Manager structure. These single files contain both the upstream Location Zoning output and the user constraints:
 
-- `json_files/demo_input_1.json` — Redmond OBAT zone (Mixed Use, 80% max impervious) + Vastu Rules
-- `json_files/demo_input_2.json` — Bellevue MDR-1 zone (Residential, 40% max coverage) + Vastu Rules
+- `demo_inputs/demo_input_1.json` — Redmond OBAT zone (Mixed Use, 80% max impervious) + Vastu Rules
+- `demo_inputs/demo_input_2.json` — Bellevue MDR-1 zone (Residential, 40% max coverage) + Vastu Rules
 
 **Run the agent directly against a demo file (CLI mode):**
 ```bash
-python3 -m src.agents.constraints.constraint_agent src/agents/constraints/json_files/demo_input_1.json > src/agents/constraints/json_files/ruleset_vastu.json
+python3 -m src.agents.constraints.constraint_agent src/agents/constraints/demo_inputs/demo_input_1.json > src/agents/constraints/demo_outputs/ruleset_vastu.json
 ```
 
 ---

@@ -22,7 +22,7 @@ The Constraint Agent serves as the "Master Rules Aggregator" for the generative 
 - `llm_parser.py`: Natural language processing logic using Google Gemini.
 - `validator.py`: Pre-flight constraint validation logic.
 - `test_constraint_agent.py`: Unit tests for this module (run with `python -m unittest`).
-- `json_files/`: Demo zoning JSON payloads for manual testing.
+- `demo_inputs/`: Demo zoning JSON payloads for manual testing.
 - `user_constraints.txt`: Optional file for natural language overrides (read automatically if present).
 
 ## Testing & Commands

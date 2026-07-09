@@ -90,10 +90,11 @@ if __name__ == "__main__":
     out_dxf = args.output_dxf
     img_prefix = args.img_prefix
     
+    # If the user just specified a filename, route it to demo_outputs
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    gen_dir = os.path.join(base_dir, "generated_files")
+    gen_dir = os.path.join(base_dir, "demo_outputs")
     
-    # If the user just specified a filename, route it to generated_files
+    # If the user just specified a filename, route it to demo_outputs
     if not os.path.dirname(out_dxf):
         os.makedirs(gen_dir, exist_ok=True)
         out_dxf = os.path.join(gen_dir, out_dxf)

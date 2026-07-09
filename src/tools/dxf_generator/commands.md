@@ -92,7 +92,7 @@ The DXF Generator can also be run directly from the command line without the API
 python3 -m src.tools.dxf_generator.dxf_generator \
     src/tools/dxf_generator/demo_inputs/floor_plan.json \
     floor_plan.dxf
-# Output saved to: src/tools/dxf_generator/generated_files/floor_plan.dxf
+# Output saved to: src/tools/dxf_generator/demo_outputs/floor_plan.dxf
 ```
 
 **Generate a combined DXF from multiple inputs:**
@@ -119,4 +119,4 @@ python3 -m src.tools.dxf_generator.dxf_generator \
     --render --img-prefix my_preview
 ```
 
-> **Auto File Routing**: If you give a plain filename (not a full path) as output, files are automatically saved to `generated_files/` inside the tool directory.
+> **Auto File Routing**: If you give a plain filename (not a full path) as output, files are automatically saved to `demo_outputs/` inside the tool directory.

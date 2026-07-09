@@ -48,7 +48,7 @@ curl http://localhost:8001/health
 curl -s -X POST "http://localhost:8001/run" \
      -H "Content-Type: application/json" \
      -d '{"entities": ["bedroom"], "include_relations": true}' \
-     | python3 -m json.tool > src/tools/entity_constraint_engine/json_files/bedroom.json
+     | python3 -m json.tool > src/tools/entity_constraint_engine/demo_outputs/bedroom.json
 ```
 
 **Step 4 — Fetch rules for multiple entities and save to JSON:**
@@ -56,7 +56,7 @@ curl -s -X POST "http://localhost:8001/run" \
 curl -s -X POST "http://localhost:8001/api/v1/entity_constraints" \
      -H "Content-Type: application/json" \
      -d '{"entities": ["bedroom", "bathroom", "kitchen", "living", "dining", "corridor", "laundry", "garage", "balcony"], "include_relations": true}' \
-     | python3 -m json.tool > src/tools/entity_constraint_engine/json_files/all_entities.json
+     | python3 -m json.tool > src/tools/entity_constraint_engine/demo_outputs/all_entities.json
 ```
 *(The `-s` flag silences curl's progress bar. `python3 -m json.tool` pretty-prints the JSON before saving.)*
 
@@ -90,24 +90,24 @@ python -m unittest src/tools/entity_constraint_engine/test_entity_constraint_eng
 
 ## 5. Run Standalone (CLI mode)
 
-Inspect raw rules for any entity type directly from the project root. Output is saved to the `json_files/` folder inside the engine directory.
+Inspect raw rules for any entity type directly from the project root. Output is saved to the `demo_outputs/` folder inside the engine directory.
 
 *(Available entities: `bedroom`, `bathroom`, `kitchen`, `living`, `dining`, `corridor`, `laundry`, `garage`, `balcony`)*
 
 **For a specific room:**
 ```bash
 python3 -m src.tools.entity_constraint_engine.entity_constraint_engine bedroom
-# Generates: src/tools/entity_constraint_engine/json_files/bedroom.json
+# Generates: src/tools/entity_constraint_engine/demo_outputs/bedroom.json
 ```
 
 **For multiple rooms:**
 ```bash
 python3 -m src.tools.entity_constraint_engine.entity_constraint_engine bedroom bathroom kitchen
-# Generates: src/tools/entity_constraint_engine/json_files/bedroom_bathroom_kitchen.json
+# Generates: src/tools/entity_constraint_engine/demo_outputs/bedroom_bathroom_kitchen.json
 ```
 
 **For all rooms:**
 ```bash
 python3 -m src.tools.entity_constraint_engine.entity_constraint_engine all
-# Generates: src/tools/entity_constraint_engine/json_files/all_entities.json
+# Generates: src/tools/entity_constraint_engine/demo_outputs/all_entities.json
 ```
