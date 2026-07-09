@@ -113,7 +113,7 @@ python -m unittest src/agents/constraints/test_constraint_agent.py -v
 - `test_health_check_returns_ok` — `/health` returns 200 with correct body
 - `test_run_endpoint_exists` — `/run` route is registered (returns 422, not 404, on bad input)
 - `test_initialization_with_custom_url` — ConstraintAgent stores the provided ECE URL
-- `test_initialization_default_url_from_env` — Falls back to `ENTITY_ENGINE_URL` env var
+- `test_initialization_default_url_from_env` — Falls back to `ECE_URL` env var
 - `test_default_descriptions_contains_required_keys` — All standard setback keys exist
 - `test_legal_keys_set_contains_setbacks` — LEGAL_KEYS has the standard setback fields
 - `test_process_zoning_input_returns_dict_with_required_keys` — Output schema has all required blocks

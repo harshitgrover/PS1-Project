@@ -48,8 +48,8 @@ class TestConstraintAgentClass(unittest.TestCase):
         self.assertEqual(agent.entity_engine_url, "http://test-engine:9999")
 
     def test_initialization_default_url_from_env(self):
-        """ConstraintAgent must fall back to ENTITY_ENGINE_URL env var if no url is provided."""
-        with patch.dict(os.environ, {"ENTITY_ENGINE_URL": "http://env-engine:1234"}):
+        """ConstraintAgent must fall back to ECE_URL env var if no url is provided."""
+        with patch.dict(os.environ, {"ECE_URL": "http://env-engine:1234"}):
             agent = ConstraintAgent()
             self.assertEqual(agent.entity_engine_url, "http://env-engine:1234")
 

@@ -1,10 +1,33 @@
+from typing import Any
+
 class ConstraintValidationError(Exception):
-    def __init__(self, reasons):
+    """
+    Custom exception raised when user constraints or dimensions violate legal building codes.
+    """
+    def __init__(self, reasons: list[str]):
+        """
+        Initializes the validation error with a list of specific reasons.
+
+        Args:
+            reasons (list[str]): A list of string messages describing each validation failure.
+        """
         self.reasons = reasons
         super().__init__("Constraint validation failed")
 
 class ConstraintValidator:
-    def __init__(self, zoning_data, user_constraints, supabase_client):
+    """
+    Validates structural and user-provided constraints against legal zoning/building codes.
+    Ensures that layout requests do not violate setbacks, coverage limits, or basic habitability rules.
+    """
+    def __init__(self, zoning_data: dict, user_constraints: dict | str, supabase_client: Any):
+        """
+        Initializes the validator with current zoning data and user constraints.
+
+        Args:
+            zoning_data (dict): The raw JSON payload from the location/zoning agent.
+            user_constraints (dict | str): The parsed JSON dictionary of user constraints, or a raw string if parsing failed.
+            supabase_client (Any): The Supabase database client for fetching legal minimums.
+        """
         self.zoning = zoning_data or {}
         if isinstance(user_constraints, str):
             # If user_constraints is a string, it's unstructured text, skip structured validation
@@ -15,7 +38,18 @@ class ConstraintValidator:
             self.user_text = ""
         self.supabase = supabase_client
 
-    def validate(self):
+    def validate(self) -> None:
+        """
+        Executes the validation checks.
+        Validates setbacks, FAR/Lot Coverage, building dimensions, room sizes, and habitability.
+        Raises a ConstraintValidationError if any rules are violated.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         # We only do structural validation if user provided JSON properties
         if not self.user:
             return
@@ -197,7 +231,17 @@ class ConstraintValidator:
         if errors:
             raise ConstraintValidationError(errors)
 
-    def _extract_float(self, key, d):
+    def _extract_float(self, key: str, d: dict) -> float | None:
+        """
+        Safely extracts a float value from a dictionary.
+
+        Args:
+            key (str): The key to lookup.
+            d (dict): The dictionary to search in.
+
+        Returns:
+            float | None: The parsed float value, or None if missing/invalid.
+        """
         if not isinstance(d, dict):
             return None
         val = d.get(key)

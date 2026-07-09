@@ -1,11 +1,18 @@
 import ezdxf
 import math
-from typing import Tuple
+from typing import Tuple, Any
 
-def add_aligned_dimension(msp, p1: Tuple[float, float], p2: Tuple[float, float], offset: float, layer: str):
+def add_aligned_dimension(msp: Any, p1: Tuple[float, float], p2: Tuple[float, float], offset: float, layer: str) -> None:
     """
     Adds an aligned dimension between p1 and p2, shifted by `offset`.
     Uses ezdxf's linear dimension.
+
+    Args:
+        msp (Any): The ezdxf modelspace object.
+        p1 (Tuple[float, float]): Starting point coordinates (X, Y).
+        p2 (Tuple[float, float]): Ending point coordinates (X, Y).
+        offset (float): Orthogonal offset distance for the dimension line.
+        layer (str): The name of the layer to draw the dimension on.
     """
     dx = p2[0] - p1[0]
     dy = p2[1] - p1[1]
@@ -45,7 +52,15 @@ def add_aligned_dimension(msp, p1: Tuple[float, float], p2: Tuple[float, float],
     dim.render()
 
 def format_feet_inches(decimal_feet: float) -> str:
-    """Convert decimal feet to feet-inches string: 24.67 -> 24'8\"."""
+    """
+    Converts decimal feet to a formatted feet-inches string (e.g. 24.67 -> 24'8").
+
+    Args:
+        decimal_feet (float): The length in decimal feet.
+
+    Returns:
+        str: The formatted dimension string.
+    """
     f = int(decimal_feet)
     i = round((decimal_feet - f) * 12)
     if i == 12:

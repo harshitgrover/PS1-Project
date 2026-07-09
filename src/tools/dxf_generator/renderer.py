@@ -18,7 +18,15 @@ ACI_COLORS = {
     9: "#C0C0C0", # Light Gray
 }
 
-def render_preview(ir_data: Dict[str, Any], output_prefix: str):
+def render_preview(ir_data: Dict[str, Any], output_prefix: str) -> None:
+    """
+    Renders a 2D preview of the Intermediate Representation (IR) layout to a PNG file.
+    Plots polygons, applies formatting, adds dimension lines and labels using Matplotlib.
+
+    Args:
+        ir_data (Dict[str, Any]): The structured Intermediate Representation (IR) containing geometry.
+        output_prefix (str): Prefix for the output filename (e.g. 'output' -> 'output_preview.png').
+    """
     views = ir_data.get("views", [])
     
     fig, ax = plt.subplots(figsize=(12, 12))

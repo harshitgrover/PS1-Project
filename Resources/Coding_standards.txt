@@ -1,7 +1,52 @@
-Coding standards laid down for the whole team:
-  1. Self-explanatory names for all variables, functions, classes, and objects
-  2. Every class and function must have a docstring; all input args and return values documented with data types
-  3. Follow PEP 8 formatting guidelines for Python
-  4. Add unit tests for individual functions
-  5. Use Python logging library (not print); implement all log levels (debug, info, error, etc.)
-  6. Use try/except generously; always log errors with logger.error and raise/traceback so the failing line is identifiable
+Coding Standards & Guidelines
+1. Naming Conventions
+Use self-explanatory names for all variables, functions, classes, and objects. Names should communicate intent without needing a comment to explain them.
+
+2. 📝 Docstrings — Mandatory for Every Class & Function
+Every class and function must have a docstring. All input arguments and return values must be documented with their data types.
+This means:
+What the function/class does
+Each parameter: name, type, description
+Return value: type and description
+
+3. PEP 8 Formatting
+Follow PEP 8 formatting guidelines for Python.
+Key PEP 8 rules this implies:
+4-space indentation
+Max line length of 79 characters
+Two blank lines between top-level functions/classes
+Proper import ordering (stdlib → third-party → local)
+snake_case for variables/functions, PascalCase for classes
+
+4. Unit Tests
+Add unit tests for individual functions.
+Each function should have corresponding tests that verify its behavior in isolation — covering normal cases, edge cases, and failure scenarios.
+
+5. Logging — Use Python’s logging Library (No print)
+Use the Python logging library (not print). Implement all log levels: debug, info, error, etc.
+Level
+When to use
+DEBUG
+Detailed diagnostic info
+INFO
+General operational events
+WARNING
+Something unexpected but not breaking
+ERROR
+A failure that needs attention
+CRITICAL
+Severe failure, system may not recover
+
+
+6. Error Handling — try/except + logger.error + Traceback
+Use try/except generously. Always log errors with logger.error and raise/traceback so the failing line is identifiable.
+Don’t silently swallow exceptions
+Always log the full traceback so the exact line of failure is visible
+A traceback library snippet shared down below by the instructor.
+
+
+PR (Pull Request) Guidelines
+New code: Describe what each file does.
+Changed code: Describe what changed, why, which file, and how it was tested.
+
+

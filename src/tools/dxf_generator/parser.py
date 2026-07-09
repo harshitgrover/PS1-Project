@@ -3,10 +3,29 @@ import random
 from typing import Dict, Any, List
 
 def _convert_generic_json_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Fallback parser that converts a generic JSON dictionary into an Intermediate Representation (IR).
+    Recursively searches for anything resembling a list of 2D points to create polygons.
+
+    Args:
+        data (Dict[str, Any]): A generic unstructured JSON dictionary containing geometric data.
+
+    Returns:
+        Dict[str, Any]: A structured Intermediate Representation (IR) containing views and entities.
+    """
     layers_dict = {}
     entities = []
     
-    def is_list_of_points(node):
+    def is_list_of_points(node: Any) -> bool:
+        """
+        Determines if a given node represents a list of coordinates (e.g. [[x, y], [x, y]]).
+
+        Args:
+            node (Any): The data node to evaluate.
+
+        Returns:
+            bool: True if it is a list of 2D/3D points, False otherwise.
+        """
         if not isinstance(node, list) or len(node) < 2:
             return False
         for p in node:
@@ -16,7 +35,15 @@ def _convert_generic_json_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
                 return False
         return True
 
-    def traverse(node, current_key="Generic"):
+    def traverse(node: Any, current_key: str = "Generic") -> None:
+        """
+        Recursively traverses a JSON structure to find point arrays.
+        Infers context for layer names and labels.
+
+        Args:
+            node (Any): The current JSON node being traversed.
+            current_key (str): The context or key inferred from the parent dictionary.
+        """
         if isinstance(node, dict):
             # Try to build a better context string
             context = ""
@@ -94,7 +121,18 @@ def _convert_generic_json_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
         ]
     }
 
+
 def _convert_floor_plan_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Converts a structured floor plan JSON into an Intermediate Representation (IR).
+    Extracts rooms, boundaries, doors, and windows, assigning predefined colors.
+
+    Args:
+        data (Dict[str, Any]): Floor plan JSON data.
+
+    Returns:
+        Dict[str, Any]: A structured Intermediate Representation (IR) format.
+    """
     room_color_map = {
         "kitchen": 1,     # Red
         "dining": 2,      # Yellow
@@ -232,7 +270,17 @@ def _convert_floor_plan_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
         ]
     }
 
+
 def _convert_site_plan_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Converts a basic site plan (final_shell) JSON into an Intermediate Representation (IR).
+
+    Args:
+        data (Dict[str, Any]): Site plan JSON data containing a final_shell polygon.
+
+    Returns:
+        Dict[str, Any]: A structured Intermediate Representation (IR) format.
+    """
     layers = [
         {"name": "Site_Boundary", "color": 1}
     ]
@@ -260,27 +308,48 @@ def _convert_site_plan_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 def parse_input_json(filepath: str) -> Dict[str, Any]:
-    with open(filepath, 'r') as f:
-        data = json.load(f)
-        
-    # If wrapped in "Properties" -> "layout_output", extract it
-    if "Properties" in data and "layout_output" in data["Properties"]:
-        extracted_data = data["Properties"]["layout_output"]
-        # Keep session_id or other root level keys if needed
-        if "session_id" in data:
-            extracted_data["session_id"] = data["session_id"]
-        data = extracted_data
+    """
+    Reads a JSON file from disk, unwraps envelope structures if present,
+    and returns a standardized Intermediate Representation (IR) for rendering.
+    Uses heuristics to determine if the input is an IR, a floor plan, a site plan,
+    or unstructured generic data.
 
-    # Check if universal contract
-    if "views" in data:
-        return data
-        
-    # Heuristics for old formats
-    if "rooms" in data and "boundary" in data:
-        return _convert_floor_plan_to_ir(data)
-        
-    if "final_shell" in data:
-        return _convert_site_plan_to_ir(data)
-        
-    # Ultimate fallback: recursively hunt for anything that looks like a polygon
-    return _convert_generic_json_to_ir(data)
+    Args:
+        filepath (str): The absolute or relative path to the input JSON file.
+
+    Returns:
+        Dict[str, Any]: A standardized Intermediate Representation (IR).
+
+    Raises:
+        Exception: If the file cannot be read, contains invalid JSON, or lacks geometry.
+    """
+    try:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+            
+        # If wrapped in "Properties" -> "layout_output", extract it
+        if "Properties" in data and "layout_output" in data["Properties"]:
+            extracted_data = data["Properties"]["layout_output"]
+            # Keep session_id or other root level keys if needed
+            if "session_id" in data:
+                extracted_data["session_id"] = data["session_id"]
+            data = extracted_data
+
+        # Check if universal contract
+        if "views" in data:
+            return data
+            
+        # Heuristics for old formats
+        if "rooms" in data and "boundary" in data:
+            return _convert_floor_plan_to_ir(data)
+            
+        if "final_shell" in data:
+            return _convert_site_plan_to_ir(data)
+            
+        # Ultimate fallback: recursively hunt for anything that looks like a polygon
+        return _convert_generic_json_to_ir(data)
+
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error parsing input JSON '{filepath}': {e}", exc_info=True)
+        raise
