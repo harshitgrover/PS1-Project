@@ -19,3 +19,5 @@ output*.json
 **/output*.json
 output*.dxf
 **/output*.dxf
+output*.png
+**/output*.png
