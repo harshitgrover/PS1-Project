@@ -1,0 +1,183 @@
+{
+  "bedroom": {
+    "entity_type": "bedroom",
+    "version": "v1",
+    "size_rules": {
+      "min_area_ft2": 70,
+      "min_side_ft": 7,
+      "min_aspect_ratio": 1,
+      "max_aspect_ratio": 1.8,
+      "habitable": true
+    },
+    "feature_rules": {
+      "requires_exterior_window": true,
+      "requires_egress": true,
+      "ventilation_type": "natural",
+      "requires_door": true,
+      "requires_closet": true
+    },
+    "relational_rules": [
+      {
+        "a": "bedroom",
+        "b": "bathroom",
+        "relation": "ensuite_required",
+        "min_shared_wall_ft": 4,
+        "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall."
+      },
+      {
+        "a": "bedroom",
+        "b": "corridor",
+        "relation": "must_touch",
+        "min_shared_wall_ft": 3,
+        "description": "Bedroom must connect to a corridor sharing at least 3ft of wall."
+      },
+      {
+        "a": "bedroom",
+        "b": "kitchen",
+        "relation": "must_not_touch",
+        "description": "Kitchen should not share a wall with a bedroom."
+      },
+      {
+        "a": "bedroom",
+        "b": "laundry",
+        "relation": "must_not_touch",
+        "description": "Laundry should not touch quiet spaces like bedrooms."
+      },
+      {
+        "a": "bedroom",
+        "b": "bathroom",
+        "relation": "distance_limit",
+        "max_dist_ft": 25,
+        "description": "Bedroom to Bathroom must be < 25 ft."
+      },
+      {
+        "a": "bedroom",
+        "b": "laundry",
+        "relation": "distance_limit",
+        "max_dist_ft": 40,
+        "description": "Laundry to Bedrooms must be < 40 ft."
+      }
+    ],
+    "area_rules": []
+  },
+  "bathroom": {
+    "entity_type": "bathroom",
+    "version": "v1",
+    "size_rules": {
+      "min_area_ft2": 25,
+      "min_side_ft": 5,
+      "max_side_ft": 15,
+      "min_aspect_ratio": 1,
+      "max_aspect_ratio": 2,
+      "habitable": false
+    },
+    "feature_rules": {
+      "requires_exterior_window": false,
+      "requires_egress": false,
+      "ventilation_type": "exhaust",
+      "requires_door": true,
+      "requires_closet": false
+    },
+    "relational_rules": [
+      {
+        "a": "bathroom",
+        "b": "bedroom",
+        "relation": "ensuite_required",
+        "min_shared_wall_ft": 4,
+        "description": "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall."
+      },
+      {
+        "a": "bathroom",
+        "b": "corridor",
+        "relation": "must_touch",
+        "min_shared_wall_ft": 2.5,
+        "description": "Bathroom must connect to a corridor sharing at least 2.5ft of wall."
+      },
+      {
+        "a": "bathroom",
+        "b": "kitchen",
+        "relation": "must_not_touch",
+        "description": "Bathroom must not share a wall with the kitchen."
+      },
+      {
+        "a": "bathroom",
+        "b": "dining",
+        "relation": "must_not_touch",
+        "description": "Bathroom must not share a wall with the dining room."
+      },
+      {
+        "a": "bathroom",
+        "b": "bathroom",
+        "relation": "must_not_touch",
+        "description": "Bathrooms must not share a wall with each other."
+      }
+    ],
+    "area_rules": [
+      {
+        "rule": "bathroom_lt_served_bedroom",
+        "description": "Bathroom must be smaller than the bedroom it serves."
+      }
+    ]
+  },
+  "kitchen": {
+    "entity_type": "kitchen",
+    "version": "v1",
+    "size_rules": {
+      "min_area_ft2": 70,
+      "min_side_ft": 7,
+      "min_aspect_ratio": 1,
+      "max_aspect_ratio": 2,
+      "habitable": true
+    },
+    "feature_rules": {
+      "requires_exterior_window": false,
+      "requires_egress": false,
+      "ventilation_type": "mechanical_or_natural",
+      "requires_door": true,
+      "requires_closet": false
+    },
+    "relational_rules": [
+      {
+        "a": "kitchen",
+        "b": "living",
+        "relation": "must_touch",
+        "min_shared_wall_ft": 2.5,
+        "description": "Kitchen must connect to the living room sharing at least 2.5ft of wall."
+      },
+      {
+        "a": "kitchen",
+        "b": "dining",
+        "relation": "must_touch",
+        "min_shared_wall_ft": 4,
+        "description": "Kitchen must connect to dining."
+      },
+      {
+        "a": "kitchen",
+        "b": "bathroom",
+        "relation": "must_not_touch",
+        "description": "Bathroom must not share a wall with the kitchen."
+      },
+      {
+        "a": "kitchen",
+        "b": "bedroom",
+        "relation": "must_not_touch",
+        "description": "Kitchen should not share a wall with a bedroom."
+      },
+      {
+        "a": "kitchen",
+        "b": "dining",
+        "relation": "distance_limit",
+        "max_dist_ft": 15,
+        "description": "Kitchen to Dining must be < 15 ft."
+      },
+      {
+        "a": "kitchen",
+        "b": "garage",
+        "relation": "distance_limit",
+        "max_dist_ft": 30,
+        "description": "Garage to Kitchen must be < 30 ft."
+      }
+    ],
+    "area_rules": []
+  }
+}

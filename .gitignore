@@ -12,15 +12,9 @@ api.log
 pyrefly.toml
 venv/
 
-# Agent Inputs, Outputs, and Temporary Files
-json_files/
-**/json_files/
+# Ignore Generated Outputs
 generated_files/
 **/generated_files/
-demo_inputs/
-**/demo_inputs/
-demo_input*.json
-**/demo_input*.json
 output*.json
 **/output*.json
 output*.dxf
