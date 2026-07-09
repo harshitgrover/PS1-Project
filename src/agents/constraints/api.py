@@ -69,8 +69,10 @@ def generate_constraints(request: ConstraintRequest) -> dict:
         agent = ConstraintAgent(entity_engine_url=ece_url)
         
         # location_zoning_output and user_constraints come from Properties
+        # user_constraints may come directly (for testing) or via planner_output
         zoning_data = request.Properties.get("location_zoning_output", {})
-        raw_user_constraints = request.Properties.get("user_constraints")
+        planner_data = request.Properties.get("planner_output", {})
+        raw_user_constraints = request.Properties.get("user_constraints") or planner_data.get("user_constraints")
         user_constraints = str(raw_user_constraints) if raw_user_constraints else ""
         
         # process_zoning_input returns final_schema
@@ -97,19 +99,27 @@ def generate_constraints(request: ConstraintRequest) -> dict:
         if type(e).__name__ == "ConstraintValidationError":
             reasons = getattr(e, "reasons", [str(e)])
             logger.error(f"Validation Error for {request.session_id}: {reasons}")
-            raise HTTPException(status_code=500, detail={
-                "error": "Constraint validation failed",
-                "validation_errors": reasons,
-                "agent": "constraint_agent",
-                "status": "error"
-            })
+            return {
+                "session_id": request.session_id,
+                "status": "failed",
+                "file_refs": [],
+                "Properties": {
+                    "error": "Constraint validation failed",
+                    "validation_errors": reasons,
+                    "agent": "constraint_agent"
+                }
+            }
             
         logger.error(f"Error generating constraints for {request.session_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={
-            "error": str(e),
-            "agent": "constraint_agent",
-            "status": "error"
-        })
+        return {
+            "session_id": request.session_id,
+            "status": "failed",
+            "file_refs": [],
+            "Properties": {
+                "error": str(e),
+                "agent": "constraint_agent"
+            }
+        }
 
 if __name__ == "__main__":
     import uvicorn
