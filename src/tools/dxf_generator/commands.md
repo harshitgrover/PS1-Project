@@ -49,7 +49,7 @@ curl http://localhost:8003/metrics
 ```bash
 curl -X POST "http://localhost:8003/run" \
      -H "Content-Type: application/json" \
-     -d @src/tools/dxf_generator/demo_inputs/demo_input.json
+     -d @src/tools/dxf_generator/demo_inputs/floor_plan.json
 ```
 
 **Step 5 — Verify metrics updated:**
@@ -89,7 +89,7 @@ The DXF Generator can also be run directly from the command line without the API
 
 **Generate a single DXF:**
 ```bash
-python3 -m src.tools.dxf_generator.dxf_generator \
+python3 -m src.tools.dxf_generator \
     src/tools/dxf_generator/demo_inputs/floor_plan.json \
     floor_plan.dxf
 # Output saved to: src/tools/dxf_generator/demo_outputs/floor_plan.dxf
@@ -97,7 +97,7 @@ python3 -m src.tools.dxf_generator.dxf_generator \
 
 **Generate a combined DXF from multiple inputs:**
 ```bash
-python3 -m src.tools.dxf_generator.dxf_generator \
+python3 -m src.tools.dxf_generator \
     src/tools/dxf_generator/demo_inputs/site_plan.json \
     src/tools/dxf_generator/demo_inputs/floor_plan.json \
     combined_plan.dxf
@@ -105,7 +105,7 @@ python3 -m src.tools.dxf_generator.dxf_generator \
 
 **Generate with a visual PNG preview:**
 ```bash
-python3 -m src.tools.dxf_generator.dxf_generator \
+python3 -m src.tools.dxf_generator \
     src/tools/dxf_generator/demo_inputs/floor_plan.json \
     floor_plan.dxf \
     --render
@@ -113,7 +113,7 @@ python3 -m src.tools.dxf_generator.dxf_generator \
 
 **Custom prefix for rendered images:**
 ```bash
-python3 -m src.tools.dxf_generator.dxf_generator \
+python3 -m src.tools.dxf_generator \
     src/tools/dxf_generator/demo_inputs/floor_plan.json \
     floor_plan.dxf \
     --render --img-prefix my_preview

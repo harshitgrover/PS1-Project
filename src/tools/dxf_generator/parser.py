@@ -53,6 +53,24 @@ def _convert_generic_json_to_ir(data: Dict[str, Any]) -> Dict[str, Any]:
                     "closed": True,  # Assume closed for generic polygons
                     "auto_dimension": True
                 })
+                
+                # Add an inferred label based on the dictionary key
+                if current_key and current_key.lower() not in ["generic", "polygon", "points", "boundary"]:
+                    min_x = min(p[0] for p in pts)
+                    max_x = max(p[0] for p in pts)
+                    min_y = min(p[1] for p in pts)
+                    max_y = max(p[1] for p in pts)
+                    cx = (min_x + max_x) / 2
+                    cy = (min_y + max_y) / 2
+                    
+                    entities.append({
+                        "type": "label",
+                        "layer": layer_name,
+                        "text": current_key.replace("_", " ").title(),
+                        "position": [cx, cy],
+                        "height": 0.8,
+                        "rotation": 0.0
+                    })
             else:
                 for item in node:
                     traverse(item, current_key)
@@ -245,6 +263,14 @@ def parse_input_json(filepath: str) -> Dict[str, Any]:
     with open(filepath, 'r') as f:
         data = json.load(f)
         
+    # If wrapped in "Properties" -> "layout_output", extract it
+    if "Properties" in data and "layout_output" in data["Properties"]:
+        extracted_data = data["Properties"]["layout_output"]
+        # Keep session_id or other root level keys if needed
+        if "session_id" in data:
+            extracted_data["session_id"] = data["session_id"]
+        data = extracted_data
+
     # Check if universal contract
     if "views" in data:
         return data

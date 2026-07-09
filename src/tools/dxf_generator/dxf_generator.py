@@ -1,6 +1,7 @@
 import argparse
 import sys
 import os
+import math
 import logging
 from .parser import parse_input_json
 from .core_engine import DXFEngine
@@ -54,7 +55,9 @@ def generate_dxf(json_paths: list, out_dxf: str, render: bool = False, out_img_p
                         p1 = pts[i]
                         p2 = pts[(i+1) % len(pts)]
                         if p1 != p2:
-                            engine.draw_dimension(p1, p2, offset=1.0, layer=f"{view_id}_Dimensions")
+                            dist = math.hypot(p2[0]-p1[0], p2[1]-p1[1])
+                            if dist >= 1.0:
+                                engine.draw_dimension(p1, p2, offset=1.0, layer=f"{view_id}_Dimensions")
                             
         # Second Pass: Draw labels (so they are not occluded by solid hatches)
         for ent in view.get("entities", []):
@@ -78,30 +81,3 @@ def generate_dxf(json_paths: list, out_dxf: str, render: bool = False, out_img_p
         render_preview(combined_ir, prefix)
         logger.info(f"Rendered previews saved with prefix {prefix}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="DXF Generator")
-    parser.add_argument("input_jsons", nargs='+', help="Path to one or more input JSON files")
-    parser.add_argument("output_dxf", help="Path to output DXF file")
-    parser.add_argument("--render", action="store_true", help="Generate matplotlib preview images")
-    parser.add_argument("--img-prefix", default="", help="Prefix for rendered images")
-    
-    args = parser.parse_args()
-    
-    out_dxf = args.output_dxf
-    img_prefix = args.img_prefix
-    
-    # If the user just specified a filename, route it to demo_outputs
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    gen_dir = os.path.join(base_dir, "demo_outputs")
-    
-    # If the user just specified a filename, route it to demo_outputs
-    if not os.path.dirname(out_dxf):
-        os.makedirs(gen_dir, exist_ok=True)
-        out_dxf = os.path.join(gen_dir, out_dxf)
-        
-    # If they specified a custom image prefix without a path, route it as well
-    if img_prefix and not os.path.dirname(img_prefix):
-        os.makedirs(gen_dir, exist_ok=True)
-        img_prefix = os.path.join(gen_dir, img_prefix)
-        
-    generate_dxf(args.input_jsons, out_dxf, args.render, img_prefix)
