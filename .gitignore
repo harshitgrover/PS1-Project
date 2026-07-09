@@ -15,8 +15,6 @@ venv/
 # Ignore Generated Outputs
 demo_outputs/
 **/demo_outputs/
-generated_files/
-**/generated_files/
 output*.json
 **/output*.json
 output*.dxf
