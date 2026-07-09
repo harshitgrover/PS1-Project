@@ -53,12 +53,20 @@ python3 -m src.agents.constraints.api
 **Window 1 (Entity Constraint Engine):**
 ```bash
 source venv/bin/activate
+
+# Optional: if port 8001 is already in use, kill the existing process first:
+# lsof -ti:8001 | xargs kill -9
+
 python3 -m src.tools.entity_constraint_engine.api
 ```
 
 **Window 2 (Constraint Agent):**
 ```bash
 source venv/bin/activate
+
+# Optional: if port 8002 is already in use, kill the existing process first:
+# lsof -ti:8002 | xargs kill -9
+
 python3 -m src.agents.constraints.api
 ```
 
