@@ -89,7 +89,7 @@ curl http://localhost:8002/metrics | grep agent_requests_total
 curl -s -X POST "http://localhost:8002/run" \
      -H "Content-Type: application/json" \
      -d @src/agents/constraints/demo_inputs/demo_input_1.json \
-     | python3 -m json.tool > src/agents/constraints/demo_outputs/ruleset_redmond_obat.json
+     | python3 -m json.tool > src/agents/constraints/demo_outputs/ruleset_demo1.json
 ```
 *(The `-s` flag silences curl's progress bar. `python3 -m json.tool` pretty-prints the JSON before saving.)*
 
@@ -132,7 +132,7 @@ Mock inputs pre-formatted into the centralized Agent Manager structure. These si
 
 **Run the agent directly against a demo file (CLI mode):**
 ```bash
-python3 -m src.agents.constraints.constraint_agent src/agents/constraints/demo_inputs/demo_input_1.json > src/agents/constraints/demo_outputs/ruleset_vastu.json
+python3 -m src.agents.constraints.constraint_agent src/agents/constraints/demo_inputs/demo_input_1.json > src/agents/constraints/demo_outputs/ruleset_demo1.json
 ```
 
 ---

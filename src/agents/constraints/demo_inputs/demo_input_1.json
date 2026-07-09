@@ -50,6 +50,6 @@
         }
       }
     },
-    "user_constraints": "I want no bathrooms."
+    "user_constraints": "I want 3 bedroom and 3 bathroom. 1 bathroom should be common and 2 attached with bedrooms. I want vastu rules."
   }
 }
