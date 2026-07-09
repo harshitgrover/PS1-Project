@@ -216,12 +216,7 @@ class ConstraintAgent:
             "front_setback_ft": None,
             "rear_setback_ft": None,
             "side_setback_ft": None,
-            "min_house_width_ft": None,
-            "min_house_depth_ft": None,
-            "door_corner_margin_ft": 2.0,
             "max_lot_coverage_fraction": None,
-            "min_area_fraction_of_max": 0.85,
-            "tree_protection_zone": {"type": "polygon", "coordinates": []}
         }
         
         # 2. Fetch Interior rules ONLY for required entities
