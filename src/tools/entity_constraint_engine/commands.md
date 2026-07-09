@@ -30,6 +30,10 @@ python3 -m src.tools.entity_constraint_engine.api
 **Step 1 — Start the server:**
 ```bash
 source venv/bin/activate
+
+# Optional: if you get "address already in use" on port 8001, kill the existing process first:
+# lsof -ti:8001 | xargs kill -9
+
 python3 -m src.tools.entity_constraint_engine.api
 ```
 

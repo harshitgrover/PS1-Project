@@ -20,6 +20,10 @@ Start the FastAPI server (defaults to port 8002):
 ```bash
 # From project root
 source venv/bin/activate
+
+# Optional: if you get "address already in use" on port 8002, kill the existing process first:
+# lsof -ti:8002 | xargs kill -9
+
 python3 -m src.agents.constraints.api
 ```
 
@@ -41,6 +45,10 @@ python3 -m src.agents.constraints.api
 **Step 1 — Start the server:**
 ```bash
 source venv/bin/activate
+
+# Optional: if you get "address already in use" on port 8002, kill the existing process first:
+# lsof -ti:8002 | xargs kill -9
+
 python3 -m src.agents.constraints.api
 ```
 
