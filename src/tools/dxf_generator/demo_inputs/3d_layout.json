@@ -1,127 +1,295 @@
 {
-  "metadata": {
-    "type": "universal_dxf_contract",
-    "description": "A 3D spatial model of a residential house with a gabled roof and door opening"
-  },
-  "views": [
-    {
-      "view_id": "3d_house_demo",
-      "type": "3d_model",
-      "layers": [
-        {"name": "1_Foundation", "color": 8},
-        {"name": "2_Exterior_Walls", "color": 2},
-        {"name": "3_Gable_Roof", "color": 1},
-        {"name": "4_Door", "color": 4}
-      ],
-      "entities": [
+  "session_id": "5eafebb7",
+  "file_refs": [],
+  "Properties": {
+    "layout_output": {
+      "metadata": {
+        "type": "universal_dxf_contract",
+        "description": "A 3D spatial model of a residential house with a gabled roof and door opening"
+      },
+      "views": [
         {
-          "type": "polygon",
-          "layer": "1_Foundation",
-          "points": [
-            [0, 0, 0],
-            [40, 0, 0],
-            [40, 30, 0],
-            [0, 30, 0]
+          "view_id": "3d_house_demo",
+          "type": "3d_model",
+          "layers": [
+            {
+              "name": "1_Foundation",
+              "color": 8
+            },
+            {
+              "name": "2_Exterior_Walls",
+              "color": 2
+            },
+            {
+              "name": "3_Gable_Roof",
+              "color": 1
+            },
+            {
+              "name": "4_Door",
+              "color": 4
+            }
           ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "2_Exterior_Walls",
-          "points": [
-            [0, 0, 0],
-            [0, 0, 10],
-            [40, 0, 10],
-            [40, 0, 0]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "2_Exterior_Walls",
-          "points": [
-            [40, 0, 0],
-            [40, 0, 10],
-            [40, 30, 10],
-            [40, 30, 0]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "2_Exterior_Walls",
-          "points": [
-            [40, 30, 0],
-            [40, 30, 10],
-            [0, 30, 10],
-            [0, 30, 0]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "2_Exterior_Walls",
-          "points": [
-            [0, 30, 0],
-            [0, 30, 10],
-            [0, 0, 10],
-            [0, 0, 0]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "3_Gable_Roof",
-          "points": [
-            [-2, -2, 10],
-            [42, -2, 10],
-            [42, 15, 18],
-            [-2, 15, 18]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "3_Gable_Roof",
-          "points": [
-            [-2, 32, 10],
-            [42, 32, 10],
-            [42, 15, 18],
-            [-2, 15, 18]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "3_Gable_Roof",
-          "points": [
-            [0, 0, 10],
-            [40, 0, 10],
-            [40, 15, 18],
-            [0, 15, 18]
-          ],
-          "closed": true
-        },
-        {
-          "type": "polygon",
-          "layer": "4_Door",
-          "points": [
-            [18, 0, 0],
-            [18, 0, 7],
-            [22, 0, 7],
-            [22, 0, 0]
-          ],
-          "closed": true
-        },
-        {
-          "type": "label",
-          "layer": "Labels",
-          "text": "3D Residential Home\n40' x 30'\nGabled Roof",
-          "position": [20, 15, 0],
-          "height": 1.5,
-          "rotation": 0.0
+          "entities": [
+            {
+              "type": "polygon",
+              "layer": "1_Foundation",
+              "points": [
+                [
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  40,
+                  0,
+                  0
+                ],
+                [
+                  40,
+                  30,
+                  0
+                ],
+                [
+                  0,
+                  30,
+                  0
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "2_Exterior_Walls",
+              "points": [
+                [
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  10
+                ],
+                [
+                  40,
+                  0,
+                  10
+                ],
+                [
+                  40,
+                  0,
+                  0
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "2_Exterior_Walls",
+              "points": [
+                [
+                  40,
+                  0,
+                  0
+                ],
+                [
+                  40,
+                  0,
+                  10
+                ],
+                [
+                  40,
+                  30,
+                  10
+                ],
+                [
+                  40,
+                  30,
+                  0
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "2_Exterior_Walls",
+              "points": [
+                [
+                  40,
+                  30,
+                  0
+                ],
+                [
+                  40,
+                  30,
+                  10
+                ],
+                [
+                  0,
+                  30,
+                  10
+                ],
+                [
+                  0,
+                  30,
+                  0
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "2_Exterior_Walls",
+              "points": [
+                [
+                  0,
+                  30,
+                  0
+                ],
+                [
+                  0,
+                  30,
+                  10
+                ],
+                [
+                  0,
+                  0,
+                  10
+                ],
+                [
+                  0,
+                  0,
+                  0
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "3_Gable_Roof",
+              "points": [
+                [
+                  -2,
+                  -2,
+                  10
+                ],
+                [
+                  42,
+                  -2,
+                  10
+                ],
+                [
+                  42,
+                  15,
+                  18
+                ],
+                [
+                  -2,
+                  15,
+                  18
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "3_Gable_Roof",
+              "points": [
+                [
+                  -2,
+                  32,
+                  10
+                ],
+                [
+                  42,
+                  32,
+                  10
+                ],
+                [
+                  42,
+                  15,
+                  18
+                ],
+                [
+                  -2,
+                  15,
+                  18
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "3_Gable_Roof",
+              "points": [
+                [
+                  0,
+                  0,
+                  10
+                ],
+                [
+                  40,
+                  0,
+                  10
+                ],
+                [
+                  40,
+                  15,
+                  18
+                ],
+                [
+                  0,
+                  15,
+                  18
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "polygon",
+              "layer": "4_Door",
+              "points": [
+                [
+                  18,
+                  0,
+                  0
+                ],
+                [
+                  18,
+                  0,
+                  7
+                ],
+                [
+                  22,
+                  0,
+                  7
+                ],
+                [
+                  22,
+                  0,
+                  0
+                ]
+              ],
+              "closed": true
+            },
+            {
+              "type": "label",
+              "layer": "Labels",
+              "text": "3D Residential Home\n40' x 30'\nGabled Roof",
+              "position": [
+                20,
+                15,
+                0
+              ],
+              "height": 1.5,
+              "rotation": 0.0
+            }
+          ]
         }
       ]
-    }
-  ]
+    },
+    "render_preview": false,
+    "iteration_number": 1
+  }
 }

@@ -239,7 +239,7 @@ class ConstraintAgent:
         if parsed_user_constraints:
             try:
                 parsed = parsed_user_constraints
-                print(f"DEBUG: parsed LLM output: {parsed}")
+                logger.debug(f"parsed LLM output: {parsed}")
                 if "required_instances" in parsed and isinstance(parsed["required_instances"], list):
                     # It's already pulled above from parsed_user_constraints
                     pass
@@ -298,6 +298,7 @@ class ConstraintAgent:
                     json={"entities": base_types_needed, "include_relations": True},
                     timeout=10.0
                 )
+                batch_data = {}
                 if response.status_code == 200:
                     batch_data = response.json().get("entities", {})
                     # 1a. Build room specs for each instance
@@ -348,8 +349,9 @@ class ConstraintAgent:
                             # Prevent duplicates since we might process the same base type twice? No, we are iterating batch_data.items()
                             if rule_copy not in area_rules_list:
                                 area_rules_list.append(rule_copy)
-                if base_types_needed:
-                    logger.warning(f"Could not fetch constraints for entities: {base_types_needed}")
+                missing_types = [t for t in base_types_needed if t not in batch_data]
+                if missing_types:
+                    logger.warning(f"Could not fetch constraints for entities: {missing_types}")
             except Exception as e:
                 logger.error(f"Error calling Entity Constraint Engine API: {e}", exc_info=True)
                     
@@ -543,17 +545,39 @@ class ConstraintAgent:
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
-        logger.info("Usage: python3 constraint_agent.py <zoning_json_file>")
+        logger.info("Usage: python3 -m src.agents.constraints.constraint_agent <input_json_file>")
         sys.exit(1)
         
-    zoning_file = sys.argv[1]
+    input_file = sys.argv[1]
     
     try:
-        with open(zoning_file, 'r') as f:
-            zoning_data = json.load(f)
+        with open(input_file, 'r') as f:
+            request_data = json.load(f)
+            
+        session_id = request_data.get("session_id", "local-test")
+        props = request_data.get("Properties", {})
+        
+        # Extract location_zoning_output schema
+        zoning_output = props.get("location_zoning_output", {})
+        zoning_schema = zoning_output.get("Properties", {}).get("schema", {})
+        
+        # Extract user text
+        planner_data = props.get("planner_output", {})
+        raw_user_constraints = props.get("user_constraints") or planner_data.get("user_constraints")
+        user_text = str(raw_user_constraints) if raw_user_constraints else ""
             
         agent = ConstraintAgent()
-        final_schema = agent.process_zoning_input(zoning_data)
-        logger.info(json.dumps(final_schema, indent=2))
+        final_schema = agent.process_zoning_input(zoning_schema, user_text=user_text)
+        
+        response_data = {
+            "session_id": session_id,
+            "status": "success",
+            "file_refs": [],
+            "Properties": {
+                "schema": final_schema
+            }
+        }
+        print(json.dumps(response_data, indent=2))
     except Exception as e:
         logger.error(f"Error running Constraint Agent: {e}", exc_info=True)
+        sys.exit(1)

@@ -60,15 +60,18 @@ def parse_user_constraints(text: str) -> dict:
     - RANGES: If they provide an explicit range (e.g. 100 to 120 sq ft), use exactly those bounds.
     - NOVEL RULES: If the user requests a constraint that does not fit the standard layout keys (e.g. "no stairs", "south facing"), invent a clear, concise snake_case key for it (e.g. "has_stairs": false). You MUST then add a plain-text description for this novel key into "user_descriptions".
     - LEVELS (CRITICAL): EVERY single key you output in room_overrides or global_overrides MUST have a corresponding entry in "user_constraint_levels". The value MUST be "hard" by default.
+    - COUNTING & NEGATIVE PHRASING (CRITICAL): Count the exact number of physical rooms explicitly requested. Do NOT hallucinate extra rooms. If the user mentions a room negatively (e.g., "a bedroom without an attached bathroom"), do NOT count that as requesting an additional bathroom. Furthermore, "without an attached bathroom" just means no `ensuite_required` relation should exist; it does NOT mean you must add a `must_not_touch` constraint. Only use `must_not_touch` if the user strictly forbids the rooms from sharing a wall.
     
     Example user input:
-    "I want a 300 sq ft master bedroom, a 100 sq ft guest bedroom, 1 kitchen, and absolutely no living room. Also the max building height is 100 ft, but that's a soft constraint."
+    "I want a 300 sq ft master bedroom with an attached bathroom, a 100 sq ft guest bedroom without an attached bathroom, 1 common bathroom, 1 kitchen, and absolutely no living room. Also the max building height is 100 ft, but that's a soft constraint."
     
     Example JSON output:
     {
       "required_instances": [
         "bedroom_1",
         "bedroom_2",
+        "bathroom_1",
+        "bathroom_2",
         "kitchen_1"
       ],
       "excluded_base_types": [
@@ -94,7 +97,14 @@ def parse_user_constraints(text: str) -> dict:
         "max_height_ft": "soft"
       },
       "user_descriptions": {},
-      "adjacency_overrides": [],
+      "adjacency_overrides": [
+        {
+          "a": "bedroom_1",
+          "b": "bathroom_1",
+          "relation": "ensuite_required",
+          "description": "User requested master bedroom to have an attached bathroom."
+        }
+      ],
       "requested_styles": []
     }
     

@@ -157,6 +157,8 @@ class EntityConstraintEngine:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    # Silence httpx to prevent it from spamming every Supabase API call
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     if len(sys.argv) < 2:
         logger.info("Usage: python3 entity_constraint_engine.py <entity_type> [entity_type2 ...]")
         logger.info("Example: python3 entity_constraint_engine.py bedroom")
@@ -167,7 +169,7 @@ if __name__ == "__main__":
     engine = EntityConstraintEngine()
     args = [arg.lower() for arg in sys.argv[1:]]
     
-    out_dir = os.path.join(os.path.dirname(__file__), 'Entity_Constraints')
+    out_dir = os.path.join(os.path.dirname(__file__), 'json_files')
     os.makedirs(out_dir, exist_ok=True)
     
     if "all" in args:
@@ -187,7 +189,7 @@ if __name__ == "__main__":
         out_path = os.path.join(out_dir, filename)
         with open(out_path, 'w') as f:
             json.dump(all_rules, f, indent=2)
-        logger.info(f"Success! Output saved to: Entity_Constraints/{filename}")
+        logger.info(f"Success! Output saved to: json_files/{filename}")
         
     elif len(args) == 1:
         result = engine.get_entity_rules(args[0])
@@ -198,7 +200,7 @@ if __name__ == "__main__":
             out_path = os.path.join(out_dir, filename)
             with open(out_path, 'w') as f:
                 json.dump(result, f, indent=2)
-            logger.info(f"Success! Output saved to: Entity_Constraints/{filename}")
+            logger.info(f"Success! Output saved to: json_files/{filename}")
             
     else:
         multi_rules = {}
@@ -209,4 +211,4 @@ if __name__ == "__main__":
         out_path = os.path.join(out_dir, filename)
         with open(out_path, 'w') as f:
             json.dump(multi_rules, f, indent=2)
-        logger.info(f"Success! Output saved to: Entity_Constraints/{filename}")
+        logger.info(f"Success! Output saved to: json_files/{filename}")

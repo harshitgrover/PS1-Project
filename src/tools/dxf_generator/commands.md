@@ -49,38 +49,7 @@ curl http://localhost:8003/metrics
 ```bash
 curl -X POST "http://localhost:8003/run" \
      -H "Content-Type: application/json" \
-     -d '{
-       "session_id": "test_001",
-       "Properties": {
-         "layout_output": {
-           "views": [
-             {
-               "view_id": "floor_plan",
-               "layers": [{"name": "Walls", "color": 7}],
-               "entities": [
-                 {
-                   "type": "polygon",
-                   "layer": "Walls",
-                   "points": [[0,0],[10,0],[10,10],[0,10]],
-                   "closed": true,
-                   "auto_dimension": true
-                 },
-                 {
-                   "type": "label",
-                   "layer": "Walls",
-                   "text": "Living Room",
-                   "position": [5, 5],
-                   "height": 0.5
-                 }
-               ]
-             }
-           ]
-         },
-         "render_preview": false,
-         "iteration_number": 1
-       },
-       "file_refs": []
-     }'
+     -d @src/tools/dxf_generator/demo_inputs/demo_input.json
 ```
 
 **Step 5 — Verify metrics updated:**

@@ -70,13 +70,15 @@ def generate_constraints(request: ConstraintRequest) -> dict:
         
         # location_zoning_output and user_constraints come from Properties
         # user_constraints may come directly (for testing) or via planner_output
-        zoning_data = request.Properties.get("location_zoning_output", {})
+        zoning_output = request.Properties.get("location_zoning_output", {})
+        zoning_schema = zoning_output.get("Properties", {}).get("schema", {})
+        
         planner_data = request.Properties.get("planner_output", {})
         raw_user_constraints = request.Properties.get("user_constraints") or planner_data.get("user_constraints")
         user_constraints = str(raw_user_constraints) if raw_user_constraints else ""
         
         # process_zoning_input returns final_schema
-        final_schema = agent.process_zoning_input(zoning_data, user_text=user_constraints)
+        final_schema = agent.process_zoning_input(zoning_schema, user_text=user_constraints)
         
         REQUEST_COUNT.labels(agent_name="constraint_agent", status="success").inc()
         

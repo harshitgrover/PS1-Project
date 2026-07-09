@@ -67,8 +67,30 @@ def seed_constraint_agent_data():
         ("vastu", "kitchen_location", "southeast", "According to Vastu, the kitchen should be in the southeast corner."),
         ("vastu", "master_bedroom_location", "southwest", "According to Vastu, the master bedroom should be in the southwest corner."),
         ("vastu", "entrance_facing", "east_or_north", "According to Vastu, the main entrance should face East or North."),
+        ("vastu", "bathroom_location", "northwest_or_west", "According to Vastu, bathrooms and toilets should be in the Northwest or West zones, never in the Northeast or Center."),
+        ("vastu", "living_room_location", "east_or_north", "According to Vastu, the living room should be in the East or North direction for positive energy."),
+        ("vastu", "center_zone_status", "empty", "The center of the house (Brahmasthan) must be kept completely empty and free of heavy structures or bathrooms."),
+        ("vastu", "staircase_location", "south_or_west", "Staircases should ideally be located in the South or West zones."),
+        ("vastu", "guest_bedroom_location", "northwest", "Guest bedrooms are best placed in the Northwest corner."),
+        ("vastu", "study_room_location", "east_or_north", "Study rooms should be located in the East, North, or Northeast."),
+        ("vastu", "puja_room_location", "northeast", "The prayer (Puja) room must be strictly in the Northeast corner (Ishan Kona)."),
+        ("vastu", "window_placement", "north_east_bias", "Maximum windows should be placed on North and East walls to allow morning sunlight."),
+        ("vastu", "staircase_direction", "clockwise", "Staircases should always turn clockwise as you go up."),
+        ("vastu", "kitchen_cooking_facing", "east", "While cooking, one must face East."),
+        ("vastu", "master_bed_direction", "head_south", "While sleeping, the head should point towards South or East, never North."),
+        ("vastu", "door_count", "even", "Total number of doors and windows should be an even number (but avoid ending in 0 like 10 or 20)."),
+        ("vastu", "boundary_wall_height", "high_south_west", "The boundary walls in the South and West should be thicker and higher than North and East walls."),
+        
         ("xhengoi", "front_door_facing", "south", "According to Xhengoi (Feng Shui), the front door should ideally face south."),
-        ("xhengoi", "bed_facing", "not_door", "According to Xhengoi, the bed should not directly face the door.")
+        ("xhengoi", "bed_facing", "not_door", "According to Xhengoi, the bed should not directly face the door."),
+        ("xhengoi", "bathroom_location", "not_center", "According to Xhengoi (Feng Shui), bathrooms should never be in the center of the home (the heart of the house)."),
+        ("xhengoi", "staircase_facing", "not_front_door", "Staircases must not directly face the front door so energy (Chi) does not immediately flow out."),
+        ("xhengoi", "kitchen_bathroom_relation", "must_not_face", "The kitchen door should not directly face the bathroom door to avoid mixing fire and water elements."),
+        ("xhengoi", "bed_position", "command_position", "Beds should be in the command position (facing the door but not directly in line with it, with a solid wall behind)."),
+        ("xhengoi", "living_room_location", "front_half", "The living room should be located in the front half of the house, close to the main entrance."),
+        ("xhengoi", "hallway_shape", "not_straight_line", "Avoid long, straight hallways connecting the front and back doors to prevent fast-moving energy (Sha Chi)."),
+        ("xhengoi", "kitchen_stove_placement", "not_under_window", "The stove must have a solid wall behind it and not be placed under a window."),
+        ("xhengoi", "kitchen_sink_stove_relation", "not_adjacent", "Sink (water) and stove (fire) should not be adjacent or directly face each other.")
     ]
     
     style_rows = []

@@ -82,23 +82,12 @@ curl http://localhost:8002/metrics | grep agent_requests_total
 # Expected: lines starting with "# HELP agent_requests_total"
 ```
 
-**Step 4 — Call /run with a real zoning payload and save to JSON:**
+**Step 4 — Call /run with a standard Agent Manager payload and save to JSON:**
 ```bash
 curl -s -X POST "http://localhost:8002/run" \
      -H "Content-Type: application/json" \
-     -d '{
-       "session_id": "test_001",
-       "Properties": {
-         "location_zoning_output": {
-           "jurisdiction": "Redmond, WA",
-           "zone_code": "OBAT",
-           "offsets": {"front": 20, "rear": 15, "side": 5},
-           "max_lot_coverage_pct": 40
-         },
-         "user_constraints": "I want 3 bedrooms and 2 bathrooms"
-       },
-       "file_refs": []
-     }' | python3 -m json.tool > src/agents/constraints/json_files/ruleset_redmond_obat.json
+     -d @src/agents/constraints/json_files/demo_input_1.json \
+     | python3 -m json.tool > src/agents/constraints/json_files/ruleset_redmond_obat.json
 ```
 *(The `-s` flag silences curl's progress bar. `python3 -m json.tool` pretty-prints the JSON before saving.)*
 
@@ -134,24 +123,24 @@ python -m unittest src/agents/constraints/test_constraint_agent.py -v
 
 ## 6. Demo JSON Files
 
-Mock outputs from the Location Zoning Agent for manual testing:
+Mock inputs pre-formatted into the centralized Agent Manager structure. These single files contain both the upstream Location Zoning output and the user constraints:
 
-- `json_files/zoning_3ded7e729f3d.json` — Redmond OBAT zone (Mixed Use, 80% max impervious)
-- `json_files/zoning_403aa1801269.json` — Bellevue MDR-1 zone (Residential, 40% max coverage)
+- `json_files/demo_input_1.json` — Redmond OBAT zone (Mixed Use, 80% max impervious) + Vastu Rules
+- `json_files/demo_input_2.json` — Bellevue MDR-1 zone (Residential, 40% max coverage) + Vastu Rules
 
 **Run the agent directly against a demo file (CLI mode):**
 ```bash
-python3 -m src.agents.constraints.constraint_agent json_files/zoning_3ded7e729f3d.json
+python3 -m src.agents.constraints.constraint_agent src/agents/constraints/json_files/demo_input_1.json > src/agents/constraints/json_files/ruleset_vastu.json
 ```
 
 ---
 
 ## 7. LLM Parsing & User Constraints
 
-To parse natural language layout instructions, add a `user_constraints.txt` file in the constraints folder or pass `user_constraints` in the Properties payload.
+To parse natural language layout instructions, include the text in the `user_constraints` property of the `Properties` object in your input JSON payload. 
 
 ```bash
 export GEMINI_API_KEY="<YOUR_API_KEY>"
 ```
 
-The LLM parser is triggered automatically when `user_constraints` is non-empty.
+The LLM parser is triggered automatically when `user_constraints` is found inside the payload (either directly in `Properties.user_constraints` or inherited from `Properties.planner_output.user_constraints`).

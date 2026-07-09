@@ -1,906 +1,914 @@
 {
-  "job_id": "test_openings",
-  "boundary": [
-    [
-      0,
-      0
-    ],
-    [
-      45,
-      0
-    ],
-    [
-      45,
-      20
-    ],
-    [
-      75,
-      20
-    ],
-    [
-      75,
-      85
-    ],
-    [
-      0,
-      85
-    ]
-  ],
-  "rooms": [
-    {
-      "name": "kitchen_1",
-      "type": "kitchen",
-      "band": "entry",
-      "size_category": "medium",
-      "windows_required": false,
-      "adjacent_to": [
-        "dining_1",
-        "living_room_1"
-      ],
-      "order": 1,
-      "polygon": [
+  "session_id": "4c9c51fe",
+  "file_refs": [],
+  "Properties": {
+    "layout_output": {
+      "job_id": "test_openings",
+      "boundary": [
         [
-          1.0,
-          1.0
+          0,
+          0
         ],
         [
-          1.0,
-          14.57
+          45,
+          0
         ],
         [
-          17.58,
-          14.57
+          45,
+          20
         ],
         [
-          17.58,
-          1.0
+          75,
+          20
+        ],
+        [
+          75,
+          85
+        ],
+        [
+          0,
+          85
         ]
       ],
-      "area": 225.07
-    },
-    {
-      "name": "dining_1",
-      "type": "dining",
-      "band": "entry",
-      "size_category": "medium",
-      "windows_required": false,
-      "adjacent_to": [
-        "kitchen_1",
-        "living_room_1",
-        "corridor_1"
-      ],
-      "order": 1,
-      "polygon": [
-        [
-          17.58,
-          1.0
-        ],
-        [
-          17.58,
-          14.57
-        ],
-        [
-          34.17,
-          14.57
-        ],
-        [
-          34.17,
-          1.0
-        ]
-      ],
-      "area": 225.07
-    },
-    {
-      "name": "living_room_1",
-      "type": "living_room",
-      "band": "entry",
-      "size_category": "large",
-      "windows_required": true,
-      "adjacent_to": [
-        "kitchen_1",
-        "dining_1",
-        "balcony_1",
-        "entrance_1",
-        "corridor_1"
-      ],
-      "order": 2,
-      "polygon": [
-        [
-          34.17,
-          41.71
-        ],
-        [
-          34.17,
-          14.57
-        ],
-        [
-          1.0,
-          14.57
-        ],
-        [
-          1.0,
-          41.71
-        ]
-      ],
-      "area": 900.28
-    },
-    {
-      "name": "balcony_1",
-      "type": "balcony",
-      "band": "entry",
-      "size_category": "small",
-      "windows_required": false,
-      "adjacent_to": [
-        "living_room_1",
-        "entrance_1"
-      ],
-      "order": 3,
-      "polygon": [
-        [
-          21.73,
-          41.71
-        ],
-        [
-          1.0,
-          41.71
-        ],
-        [
-          1.0,
-          84.0
-        ],
-        [
-          21.73,
-          84.0
-        ]
-      ],
-      "area": 876.67
-    },
-    {
-      "name": "entrance_1",
-      "type": "entrance",
-      "band": "entry",
-      "size_category": "small",
-      "windows_required": false,
-      "adjacent_to": [
-        "living_room_1",
-        "balcony_1",
-        "corridor_1"
-      ],
-      "order": 3,
-      "polygon": [
-        [
-          34.17,
-          84.0
-        ],
-        [
-          34.17,
-          41.71
-        ],
-        [
-          21.73,
-          41.71
-        ],
-        [
-          21.73,
-          84.0
-        ]
-      ],
-      "area": 526.05
-    },
-    {
-      "name": "corridor_1",
-      "type": "corridor",
-      "band": "corridor",
-      "size_category": "small",
-      "windows_required": false,
-      "adjacent_to": [
-        "dining_1",
-        "living_room_1",
-        "entrance_1",
-        "bedroom_1",
-        "bathroom_1",
-        "bedroom_2"
-      ],
-      "polygon": [
-        [
-          34.17,
-          1.0
-        ],
-        [
-          34.17,
-          84.0
-        ],
-        [
-          42.48,
-          84.0
-        ],
-        [
-          42.48,
-          1.0
-        ]
-      ],
-      "area": 689.73
-    },
-    {
-      "name": "bedroom_1",
-      "type": "bedroom",
-      "band": "far",
-      "size_category": "large",
-      "windows_required": true,
-      "adjacent_to": [
-        "corridor_1",
-        "bathroom_1",
-        "bedroom_2"
-      ],
-      "order": 1,
-      "polygon": [
-        [
-          57.48,
-          48.39
-        ],
-        [
-          57.48,
-          52.5
-        ],
-        [
-          74.0,
-          52.5
-        ],
-        [
-          74.0,
-          21.0
-        ],
-        [
-          44.67,
-          21.0
-        ],
-        [
-          44.17,
-          20.56
-        ],
-        [
-          44.0,
-          20.0
-        ],
-        [
-          44.0,
-          1.0
-        ],
-        [
-          42.48,
-          1.0
-        ],
-        [
-          42.48,
-          48.39
-        ]
-      ],
-      "area": 961.9
-    },
-    {
-      "name": "bathroom_1",
-      "type": "bathroom",
-      "band": "far",
-      "size_category": "medium",
-      "windows_required": false,
-      "adjacent_to": [
-        "corridor_1",
-        "bedroom_1",
-        "bedroom_2"
-      ],
-      "order": 2,
-      "polygon": [
-        [
-          42.48,
-          56.61
-        ],
-        [
-          57.48,
-          56.61
-        ],
-        [
-          57.48,
-          48.39
-        ],
-        [
-          42.48,
-          48.39
-        ]
-      ],
-      "area": 123.26
-    },
-    {
-      "name": "bedroom_2",
-      "type": "bedroom",
-      "band": "far",
-      "size_category": "large",
-      "windows_required": true,
-      "adjacent_to": [
-        "corridor_1",
-        "bedroom_1",
-        "bathroom_1"
-      ],
-      "order": 3,
-      "polygon": [
-        [
-          42.48,
-          84.0
-        ],
-        [
-          74.0,
-          84.0
-        ],
-        [
-          74.0,
-          52.5
-        ],
-        [
-          57.48,
-          52.5
-        ],
-        [
-          57.48,
-          56.61
-        ],
-        [
-          42.48,
-          56.61
-        ]
-      ],
-      "area": 931.23
-    }
-  ],
-  "doors": [
-    {
       "rooms": [
-        "dining_1",
-        "kitchen_1"
+        {
+          "name": "kitchen_1",
+          "type": "kitchen",
+          "band": "entry",
+          "size_category": "medium",
+          "windows_required": false,
+          "adjacent_to": [
+            "dining_1",
+            "living_room_1"
+          ],
+          "order": 1,
+          "polygon": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              14.57
+            ],
+            [
+              17.58,
+              14.57
+            ],
+            [
+              17.58,
+              1.0
+            ]
+          ],
+          "area": 225.07
+        },
+        {
+          "name": "dining_1",
+          "type": "dining",
+          "band": "entry",
+          "size_category": "medium",
+          "windows_required": false,
+          "adjacent_to": [
+            "kitchen_1",
+            "living_room_1",
+            "corridor_1"
+          ],
+          "order": 1,
+          "polygon": [
+            [
+              17.58,
+              1.0
+            ],
+            [
+              17.58,
+              14.57
+            ],
+            [
+              34.17,
+              14.57
+            ],
+            [
+              34.17,
+              1.0
+            ]
+          ],
+          "area": 225.07
+        },
+        {
+          "name": "living_room_1",
+          "type": "living_room",
+          "band": "entry",
+          "size_category": "large",
+          "windows_required": true,
+          "adjacent_to": [
+            "kitchen_1",
+            "dining_1",
+            "balcony_1",
+            "entrance_1",
+            "corridor_1"
+          ],
+          "order": 2,
+          "polygon": [
+            [
+              34.17,
+              41.71
+            ],
+            [
+              34.17,
+              14.57
+            ],
+            [
+              1.0,
+              14.57
+            ],
+            [
+              1.0,
+              41.71
+            ]
+          ],
+          "area": 900.28
+        },
+        {
+          "name": "balcony_1",
+          "type": "balcony",
+          "band": "entry",
+          "size_category": "small",
+          "windows_required": false,
+          "adjacent_to": [
+            "living_room_1",
+            "entrance_1"
+          ],
+          "order": 3,
+          "polygon": [
+            [
+              21.73,
+              41.71
+            ],
+            [
+              1.0,
+              41.71
+            ],
+            [
+              1.0,
+              84.0
+            ],
+            [
+              21.73,
+              84.0
+            ]
+          ],
+          "area": 876.67
+        },
+        {
+          "name": "entrance_1",
+          "type": "entrance",
+          "band": "entry",
+          "size_category": "small",
+          "windows_required": false,
+          "adjacent_to": [
+            "living_room_1",
+            "balcony_1",
+            "corridor_1"
+          ],
+          "order": 3,
+          "polygon": [
+            [
+              34.17,
+              84.0
+            ],
+            [
+              34.17,
+              41.71
+            ],
+            [
+              21.73,
+              41.71
+            ],
+            [
+              21.73,
+              84.0
+            ]
+          ],
+          "area": 526.05
+        },
+        {
+          "name": "corridor_1",
+          "type": "corridor",
+          "band": "corridor",
+          "size_category": "small",
+          "windows_required": false,
+          "adjacent_to": [
+            "dining_1",
+            "living_room_1",
+            "entrance_1",
+            "bedroom_1",
+            "bathroom_1",
+            "bedroom_2"
+          ],
+          "polygon": [
+            [
+              34.17,
+              1.0
+            ],
+            [
+              34.17,
+              84.0
+            ],
+            [
+              42.48,
+              84.0
+            ],
+            [
+              42.48,
+              1.0
+            ]
+          ],
+          "area": 689.73
+        },
+        {
+          "name": "bedroom_1",
+          "type": "bedroom",
+          "band": "far",
+          "size_category": "large",
+          "windows_required": true,
+          "adjacent_to": [
+            "corridor_1",
+            "bathroom_1",
+            "bedroom_2"
+          ],
+          "order": 1,
+          "polygon": [
+            [
+              57.48,
+              48.39
+            ],
+            [
+              57.48,
+              52.5
+            ],
+            [
+              74.0,
+              52.5
+            ],
+            [
+              74.0,
+              21.0
+            ],
+            [
+              44.67,
+              21.0
+            ],
+            [
+              44.17,
+              20.56
+            ],
+            [
+              44.0,
+              20.0
+            ],
+            [
+              44.0,
+              1.0
+            ],
+            [
+              42.48,
+              1.0
+            ],
+            [
+              42.48,
+              48.39
+            ]
+          ],
+          "area": 961.9
+        },
+        {
+          "name": "bathroom_1",
+          "type": "bathroom",
+          "band": "far",
+          "size_category": "medium",
+          "windows_required": false,
+          "adjacent_to": [
+            "corridor_1",
+            "bedroom_1",
+            "bedroom_2"
+          ],
+          "order": 2,
+          "polygon": [
+            [
+              42.48,
+              56.61
+            ],
+            [
+              57.48,
+              56.61
+            ],
+            [
+              57.48,
+              48.39
+            ],
+            [
+              42.48,
+              48.39
+            ]
+          ],
+          "area": 123.26
+        },
+        {
+          "name": "bedroom_2",
+          "type": "bedroom",
+          "band": "far",
+          "size_category": "large",
+          "windows_required": true,
+          "adjacent_to": [
+            "corridor_1",
+            "bedroom_1",
+            "bathroom_1"
+          ],
+          "order": 3,
+          "polygon": [
+            [
+              42.48,
+              84.0
+            ],
+            [
+              74.0,
+              84.0
+            ],
+            [
+              74.0,
+              52.5
+            ],
+            [
+              57.48,
+              52.5
+            ],
+            [
+              57.48,
+              56.61
+            ],
+            [
+              42.48,
+              56.61
+            ]
+          ],
+          "area": 931.23
+        }
       ],
-      "center": [
-        17.58,
-        7.79
+      "doors": [
+        {
+          "rooms": [
+            "dining_1",
+            "kitchen_1"
+          ],
+          "center": [
+            17.58,
+            7.79
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              16.98,
+              5.29
+            ],
+            [
+              18.18,
+              5.29
+            ],
+            [
+              18.18,
+              10.29
+            ],
+            [
+              16.98,
+              10.29
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "kitchen_1",
+            "living_room_1"
+          ],
+          "center": [
+            9.29,
+            14.57
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              6.79,
+              13.97
+            ],
+            [
+              11.79,
+              13.97
+            ],
+            [
+              11.79,
+              15.17
+            ],
+            [
+              6.79,
+              15.17
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "dining_1",
+            "living_room_1"
+          ],
+          "center": [
+            25.88,
+            14.57
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              23.38,
+              13.97
+            ],
+            [
+              28.38,
+              13.97
+            ],
+            [
+              28.38,
+              15.17
+            ],
+            [
+              23.38,
+              15.17
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "corridor_1",
+            "dining_1"
+          ],
+          "center": [
+            34.17,
+            7.79
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              33.57,
+              5.29
+            ],
+            [
+              34.77,
+              5.29
+            ],
+            [
+              34.77,
+              10.29
+            ],
+            [
+              33.57,
+              10.29
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "balcony_1",
+            "living_room_1"
+          ],
+          "center": [
+            11.37,
+            41.71
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              8.87,
+              41.11
+            ],
+            [
+              13.87,
+              41.11
+            ],
+            [
+              13.87,
+              42.31
+            ],
+            [
+              8.87,
+              42.31
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "entrance_1",
+            "living_room_1"
+          ],
+          "center": [
+            27.95,
+            41.71
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              25.45,
+              41.11
+            ],
+            [
+              30.45,
+              41.11
+            ],
+            [
+              30.45,
+              42.31
+            ],
+            [
+              25.45,
+              42.31
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "corridor_1",
+            "living_room_1"
+          ],
+          "center": [
+            34.17,
+            28.14
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              33.57,
+              25.64
+            ],
+            [
+              34.77,
+              25.64
+            ],
+            [
+              34.77,
+              30.64
+            ],
+            [
+              33.57,
+              30.64
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "balcony_1",
+            "entrance_1"
+          ],
+          "center": [
+            21.73,
+            62.86
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              21.13,
+              60.36
+            ],
+            [
+              22.33,
+              60.36
+            ],
+            [
+              22.33,
+              65.36
+            ],
+            [
+              21.13,
+              65.36
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "corridor_1",
+            "entrance_1"
+          ],
+          "center": [
+            34.17,
+            62.86
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              33.57,
+              60.36
+            ],
+            [
+              34.77,
+              60.36
+            ],
+            [
+              34.77,
+              65.36
+            ],
+            [
+              33.57,
+              65.36
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "bedroom_1",
+            "corridor_1"
+          ],
+          "center": [
+            42.48,
+            24.69
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              41.88,
+              22.19
+            ],
+            [
+              43.08,
+              22.19
+            ],
+            [
+              43.08,
+              27.19
+            ],
+            [
+              41.88,
+              27.19
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "bathroom_1",
+            "corridor_1"
+          ],
+          "center": [
+            42.48,
+            52.5
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              41.88,
+              50.0
+            ],
+            [
+              43.08,
+              50.0
+            ],
+            [
+              43.08,
+              55.0
+            ],
+            [
+              41.88,
+              55.0
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "bedroom_2",
+            "corridor_1"
+          ],
+          "center": [
+            42.48,
+            70.31
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              41.88,
+              67.81
+            ],
+            [
+              43.08,
+              67.81
+            ],
+            [
+              43.08,
+              72.81
+            ],
+            [
+              41.88,
+              72.81
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "bathroom_1",
+            "bedroom_1"
+          ],
+          "center": [
+            51.59,
+            48.83
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              49.09,
+              48.23
+            ],
+            [
+              54.09,
+              48.23
+            ],
+            [
+              54.09,
+              49.43
+            ],
+            [
+              49.09,
+              49.43
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "bedroom_1",
+            "bedroom_2"
+          ],
+          "center": [
+            65.74,
+            52.5
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              63.24,
+              51.9
+            ],
+            [
+              68.24,
+              51.9
+            ],
+            [
+              68.24,
+              53.1
+            ],
+            [
+              63.24,
+              53.1
+            ]
+          ]
+        },
+        {
+          "rooms": [
+            "bathroom_1",
+            "bedroom_2"
+          ],
+          "center": [
+            51.59,
+            56.17
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              49.09,
+              55.57
+            ],
+            [
+              54.09,
+              55.57
+            ],
+            [
+              54.09,
+              56.77
+            ],
+            [
+              49.09,
+              56.77
+            ]
+          ]
+        }
       ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          16.98,
-          5.29
-        ],
-        [
-          18.18,
-          5.29
-        ],
-        [
-          18.18,
-          10.29
-        ],
-        [
-          16.98,
-          10.29
-        ]
+      "windows": [
+        {
+          "room": "living_room_1",
+          "center": [
+            1.0,
+            28.14
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              0.4,
+              26.14
+            ],
+            [
+              1.6,
+              26.14
+            ],
+            [
+              1.6,
+              30.14
+            ],
+            [
+              0.4,
+              30.14
+            ]
+          ]
+        },
+        {
+          "room": "bedroom_1",
+          "center": [
+            44.09,
+            20.28
+          ],
+          "orientation": "vertical",
+          "polygon": [
+            [
+              43.48,
+              18.28
+            ],
+            [
+              44.69,
+              18.28
+            ],
+            [
+              44.69,
+              22.28
+            ],
+            [
+              43.48,
+              22.28
+            ]
+          ]
+        },
+        {
+          "room": "bedroom_2",
+          "center": [
+            58.24,
+            84.0
+          ],
+          "orientation": "horizontal",
+          "polygon": [
+            [
+              56.24,
+              83.4
+            ],
+            [
+              60.24,
+              83.4
+            ],
+            [
+              60.24,
+              84.6
+            ],
+            [
+              56.24,
+              84.6
+            ]
+          ]
+        }
+      ],
+      "violations": [
+        {
+          "rule": "required_rooms",
+          "message": "Need 2x bathroom, found 1",
+          "rooms": [],
+          "measured": 1.0,
+          "required": 2.0
+        },
+        {
+          "rule": "required_rooms",
+          "message": "Need 3x bedroom, found 2",
+          "rooms": [],
+          "measured": 2.0,
+          "required": 3.0
+        },
+        {
+          "rule": "area_living_gt_bedroom",
+          "message": "living_room_1 (900 sqft) must be larger than bedroom_1 (962 sqft)",
+          "rooms": [
+            "living_room_1",
+            "bedroom_1"
+          ],
+          "measured": 900.2,
+          "required": 961.9
+        },
+        {
+          "rule": "area_living_gt_bedroom",
+          "message": "living_room_1 (900 sqft) must be larger than bedroom_2 (931 sqft)",
+          "rooms": [
+            "living_room_1",
+            "bedroom_2"
+          ],
+          "measured": 900.2,
+          "required": 931.2
+        }
       ]
     },
-    {
-      "rooms": [
-        "kitchen_1",
-        "living_room_1"
-      ],
-      "center": [
-        9.29,
-        14.57
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          6.79,
-          13.97
-        ],
-        [
-          11.79,
-          13.97
-        ],
-        [
-          11.79,
-          15.17
-        ],
-        [
-          6.79,
-          15.17
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "dining_1",
-        "living_room_1"
-      ],
-      "center": [
-        25.88,
-        14.57
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          23.38,
-          13.97
-        ],
-        [
-          28.38,
-          13.97
-        ],
-        [
-          28.38,
-          15.17
-        ],
-        [
-          23.38,
-          15.17
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "corridor_1",
-        "dining_1"
-      ],
-      "center": [
-        34.17,
-        7.79
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          33.57,
-          5.29
-        ],
-        [
-          34.77,
-          5.29
-        ],
-        [
-          34.77,
-          10.29
-        ],
-        [
-          33.57,
-          10.29
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "balcony_1",
-        "living_room_1"
-      ],
-      "center": [
-        11.37,
-        41.71
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          8.87,
-          41.11
-        ],
-        [
-          13.87,
-          41.11
-        ],
-        [
-          13.87,
-          42.31
-        ],
-        [
-          8.87,
-          42.31
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "entrance_1",
-        "living_room_1"
-      ],
-      "center": [
-        27.95,
-        41.71
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          25.45,
-          41.11
-        ],
-        [
-          30.45,
-          41.11
-        ],
-        [
-          30.45,
-          42.31
-        ],
-        [
-          25.45,
-          42.31
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "corridor_1",
-        "living_room_1"
-      ],
-      "center": [
-        34.17,
-        28.14
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          33.57,
-          25.64
-        ],
-        [
-          34.77,
-          25.64
-        ],
-        [
-          34.77,
-          30.64
-        ],
-        [
-          33.57,
-          30.64
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "balcony_1",
-        "entrance_1"
-      ],
-      "center": [
-        21.73,
-        62.86
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          21.13,
-          60.36
-        ],
-        [
-          22.33,
-          60.36
-        ],
-        [
-          22.33,
-          65.36
-        ],
-        [
-          21.13,
-          65.36
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "corridor_1",
-        "entrance_1"
-      ],
-      "center": [
-        34.17,
-        62.86
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          33.57,
-          60.36
-        ],
-        [
-          34.77,
-          60.36
-        ],
-        [
-          34.77,
-          65.36
-        ],
-        [
-          33.57,
-          65.36
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "bedroom_1",
-        "corridor_1"
-      ],
-      "center": [
-        42.48,
-        24.69
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          41.88,
-          22.19
-        ],
-        [
-          43.08,
-          22.19
-        ],
-        [
-          43.08,
-          27.19
-        ],
-        [
-          41.88,
-          27.19
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "bathroom_1",
-        "corridor_1"
-      ],
-      "center": [
-        42.48,
-        52.5
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          41.88,
-          50.0
-        ],
-        [
-          43.08,
-          50.0
-        ],
-        [
-          43.08,
-          55.0
-        ],
-        [
-          41.88,
-          55.0
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "bedroom_2",
-        "corridor_1"
-      ],
-      "center": [
-        42.48,
-        70.31
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          41.88,
-          67.81
-        ],
-        [
-          43.08,
-          67.81
-        ],
-        [
-          43.08,
-          72.81
-        ],
-        [
-          41.88,
-          72.81
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "bathroom_1",
-        "bedroom_1"
-      ],
-      "center": [
-        51.59,
-        48.83
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          49.09,
-          48.23
-        ],
-        [
-          54.09,
-          48.23
-        ],
-        [
-          54.09,
-          49.43
-        ],
-        [
-          49.09,
-          49.43
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "bedroom_1",
-        "bedroom_2"
-      ],
-      "center": [
-        65.74,
-        52.5
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          63.24,
-          51.9
-        ],
-        [
-          68.24,
-          51.9
-        ],
-        [
-          68.24,
-          53.1
-        ],
-        [
-          63.24,
-          53.1
-        ]
-      ]
-    },
-    {
-      "rooms": [
-        "bathroom_1",
-        "bedroom_2"
-      ],
-      "center": [
-        51.59,
-        56.17
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          49.09,
-          55.57
-        ],
-        [
-          54.09,
-          55.57
-        ],
-        [
-          54.09,
-          56.77
-        ],
-        [
-          49.09,
-          56.77
-        ]
-      ]
-    }
-  ],
-  "windows": [
-    {
-      "room": "living_room_1",
-      "center": [
-        1.0,
-        28.14
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          0.4,
-          26.14
-        ],
-        [
-          1.6,
-          26.14
-        ],
-        [
-          1.6,
-          30.14
-        ],
-        [
-          0.4,
-          30.14
-        ]
-      ]
-    },
-    {
-      "room": "bedroom_1",
-      "center": [
-        44.09,
-        20.28
-      ],
-      "orientation": "vertical",
-      "polygon": [
-        [
-          43.48,
-          18.28
-        ],
-        [
-          44.69,
-          18.28
-        ],
-        [
-          44.69,
-          22.28
-        ],
-        [
-          43.48,
-          22.28
-        ]
-      ]
-    },
-    {
-      "room": "bedroom_2",
-      "center": [
-        58.24,
-        84.0
-      ],
-      "orientation": "horizontal",
-      "polygon": [
-        [
-          56.24,
-          83.4
-        ],
-        [
-          60.24,
-          83.4
-        ],
-        [
-          60.24,
-          84.6
-        ],
-        [
-          56.24,
-          84.6
-        ]
-      ]
-    }
-  ],
-  "violations": [
-    {
-      "rule": "required_rooms",
-      "message": "Need 2x bathroom, found 1",
-      "rooms": [],
-      "measured": 1.0,
-      "required": 2.0
-    },
-    {
-      "rule": "required_rooms",
-      "message": "Need 3x bedroom, found 2",
-      "rooms": [],
-      "measured": 2.0,
-      "required": 3.0
-    },
-    {
-      "rule": "area_living_gt_bedroom",
-      "message": "living_room_1 (900 sqft) must be larger than bedroom_1 (962 sqft)",
-      "rooms": [
-        "living_room_1",
-        "bedroom_1"
-      ],
-      "measured": 900.2,
-      "required": 961.9
-    },
-    {
-      "rule": "area_living_gt_bedroom",
-      "message": "living_room_1 (900 sqft) must be larger than bedroom_2 (931 sqft)",
-      "rooms": [
-        "living_room_1",
-        "bedroom_2"
-      ],
-      "measured": 900.2,
-      "required": 931.2
-    }
-  ]
+    "render_preview": false,
+    "iteration_number": 1
+  }
 }
