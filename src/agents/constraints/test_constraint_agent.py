@@ -119,7 +119,8 @@ class TestConstraintAgentClass(unittest.TestCase):
         """process_zoning_input must raise ConstraintValidationError if habitability is violated."""
         # Mock the LLM returning only bedrooms (violates building codes requiring bath/kitchen)
         mock_parse.return_value = {
-            "required_instances": ["bedroom_1", "bedroom_2"]
+            "required_instances": ["bedroom_1", "bedroom_2"],
+            "excluded_base_types": ["bathroom", "kitchen"]
         }
         
         agent = ConstraintAgent()
