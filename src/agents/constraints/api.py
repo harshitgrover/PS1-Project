@@ -27,11 +27,17 @@ INFERENCE_LATENCY = Histogram("agent_inference_latency_seconds", "Time per /run 
 MODEL_ERROR_COUNT = Counter("agent_model_errors_total", "LLM/solver errors", ["agent_name", "error_type"])
 
 class FileRef(BaseModel):
+    """
+    Reference to a file stored in S3.
+    """
     type: str
     bucket: str
     key: str
 
 class ConstraintRequest(BaseModel):
+    """
+    Request model for Constraint Agent endpoint.
+    """
     session_id: str
     Properties: Dict[str, Any]
     file_refs: Optional[List[FileRef]] = []
@@ -49,7 +55,6 @@ async def health():
     """
     return {"status": "ok", "agent": "constraint_agent"}
 
-@app.post("/api/v1/constraints")
 @app.post("/run")
 @INFERENCE_LATENCY.time()
 def generate_constraints(request: ConstraintRequest) -> dict:

@@ -294,7 +294,7 @@ class ConstraintAgent:
             try:
                 # Sync HTTP request to the internal engine
                 response = httpx.post(
-                    f"{self.entity_engine_url}/api/v1/entity_constraints",
+                    f"{self.entity_engine_url}/run",
                     json={"entities": base_types_needed, "include_relations": True},
                     timeout=10.0
                 )

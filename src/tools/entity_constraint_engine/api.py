@@ -31,10 +31,16 @@ MODEL_ERROR_COUNT = Counter("agent_model_errors_total", "LLM/solver errors", ["a
 engine = EntityConstraintEngine()
 
 class EntityRulesRequest(BaseModel):
+    """
+    Request model for Entity Constraint Engine.
+    """
     entities: List[str]
     include_relations: bool = True
 
 class EntityRulesResponse(BaseModel):
+    """
+    Response model for Entity Constraint Engine.
+    """
     # Map of entity name to their rules
     entities: Dict[str, Any]
 
@@ -51,7 +57,6 @@ def health_check() -> dict:
     """
     return {"status": "ok", "agent": "entity_engine"}
 
-@app.post("/api/v1/entity_constraints", response_model=EntityRulesResponse)
 @app.post("/run", response_model=EntityRulesResponse)
 @INFERENCE_LATENCY.time()
 def get_rules(request: EntityRulesRequest) -> dict:
@@ -78,7 +83,11 @@ def get_rules(request: EntityRulesRequest) -> dict:
         REQUEST_COUNT.labels(agent_name="entity_engine", status="error").inc()
         MODEL_ERROR_COUNT.labels(agent_name="entity_engine", error_type=type(e).__name__).inc()
         logger.error(f"Error in get_rules: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail={
+            "error": str(e),
+            "agent": "entity_engine",
+            "status": "error"
+        })
 
 if __name__ == "__main__":
     import uvicorn

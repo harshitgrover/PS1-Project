@@ -26,11 +26,17 @@ INFERENCE_LATENCY = Histogram("agent_inference_latency_seconds", "Time per /run 
 MODEL_ERROR_COUNT = Counter("agent_model_errors_total", "LLM/solver errors", ["agent_name", "error_type"])
 
 class FileRef(BaseModel):
+    """
+    Reference to a file stored in S3.
+    """
     type: str
     bucket: str
     key: str
 
 class DXFRequest(BaseModel):
+    """
+    Request model for DXF generation endpoint.
+    """
     session_id: str
     Properties: Dict[str, Any]
     file_refs: Optional[List[FileRef]] = []
@@ -67,7 +73,6 @@ def health_check() -> dict:
     """
     return {"status": "ok", "agent": "dxf_generator"}
 
-@app.post("/api/v1/generate_dxf")
 @app.post("/run")
 @INFERENCE_LATENCY.time()
 def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks) -> dict:
@@ -154,7 +159,7 @@ def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks
         MODEL_ERROR_COUNT.labels(agent_name="dxf_generator", error_type=type(e).__name__).inc()
         logger.error(f"Error generating DXF for {request.session_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail={
-            "error_message": str(e),
+            "error": str(e),
             "agent": "dxf_generator",
             "status": "error"
         })
