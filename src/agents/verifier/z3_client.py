@@ -6,7 +6,7 @@ from contracts import VerificationRequest, ViolationDetail, Severity
 logger = logging.getLogger(__name__)
 
 # Add z3_verifier_tool to path
-z3_tool_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'z3_verifier_tool'))
+z3_tool_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'tools', 'z3_verifier'))
 if z3_tool_path not in sys.path:
     sys.path.append(z3_tool_path)
 

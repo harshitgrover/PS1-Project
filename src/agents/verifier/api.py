@@ -26,7 +26,7 @@ def supported_constraints():
         ]
     }
 
-@app.post("/api/v1/verifier", response_model=VerificationResponse)
+@app.post("/verify", response_model=VerificationResponse)
 def verify_layout(request: VerificationRequest):
     """
     Accepts a VerificationRequest, processes it synchronously via the Dispatcher,
