@@ -106,7 +106,7 @@ def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks
         generate_dxf([json_path], dxf_path, render=render_preview, out_img_prefix=img_prefix)
         
         if not os.path.exists(dxf_path):
-            raise HTTPException(status_code=500, detail="Failed to generate DXF file")
+            raise Exception("Failed to generate DXF file")
             
         # Upload to S3
         aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
@@ -158,11 +158,15 @@ def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks
         REQUEST_COUNT.labels(agent_name="dxf_generator", status="error").inc()
         MODEL_ERROR_COUNT.labels(agent_name="dxf_generator", error_type=type(e).__name__).inc()
         logger.error(f"Error generating DXF for {request.session_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={
-            "error": str(e),
-            "agent": "dxf_generator",
-            "status": "error"
-        })
+        return {
+            "session_id": request.session_id,
+            "status": "failed",
+            "file_refs": [],
+            "Properties": {
+                "error": str(e),
+                "agent": "dxf_generator"
+            }
+        }
 
 if __name__ == "__main__":
     import uvicorn
