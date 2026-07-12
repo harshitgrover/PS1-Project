@@ -116,7 +116,8 @@ def parse_user_constraints(text: str) -> dict:
             f"{system_prompt}\n\nUser Input: {text}",
             generation_config=GenerationConfig(
                 response_mime_type="application/json"
-            )
+            ),
+            request_options={"timeout": 60.0}
         )
         text_resp = response.text.strip()
         if text_resp.startswith("```json"):

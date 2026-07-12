@@ -295,12 +295,20 @@ class ConstraintAgent:
                 # Sync HTTP request to the internal engine
                 response = httpx.post(
                     f"{self.entity_engine_url}/run",
-                    json={"entities": base_types_needed, "include_relations": True},
+                    json={
+                        "session_id": "internal-constraint-call",
+                        "Properties": {
+                            "entities": base_types_needed,
+                            "include_relations": True
+                        }
+                    },
                     timeout=10.0
                 )
                 batch_data = {}
                 if response.status_code == 200:
-                    batch_data = response.json().get("entities", {})
+                    resp_json = response.json()
+                    if resp_json.get("status") == "success":
+                        batch_data = resp_json.get("Properties", {}).get("entities", {})
                     # 1a. Build room specs for each instance
                     for inst in required_instances:
                         base = get_base_type(inst)

@@ -34,15 +34,18 @@ class EntityRulesRequest(BaseModel):
     """
     Request model for Entity Constraint Engine.
     """
-    entities: List[str]
-    include_relations: bool = True
+    session_id: str
+    file_refs: Optional[List[Dict[str, Any]]] = []
+    Properties: Dict[str, Any]
 
 class EntityRulesResponse(BaseModel):
     """
     Response model for Entity Constraint Engine.
     """
-    # Map of entity name to their rules
-    entities: Dict[str, Any]
+    session_id: str
+    status: str
+    file_refs: Optional[List[Dict[str, Any]]] = []
+    Properties: Dict[str, Any]
 
 @app.get("/health")
 def health_check() -> dict:
@@ -70,24 +73,44 @@ def get_rules(request: EntityRulesRequest) -> dict:
         dict: A dictionary containing the rules for each requested entity.
     """
     try:
-        result = engine.get_entities_rules(request.entities, request.include_relations)
+        entities = request.Properties.get("entities", [])
+        include_relations = request.Properties.get("include_relations", True)
+        
+        result = engine.get_entities_rules(entities, include_relations)
         if not result:
             REQUEST_COUNT.labels(agent_name="entity_engine", status="error").inc()
-            raise HTTPException(status_code=404, detail="No entities found")
+            return {
+                "session_id": request.session_id,
+                "status": "failed",
+                "file_refs": [],
+                "Properties": {
+                    "error": "No entities found",
+                    "agent": "entity_engine"
+                }
+            }
         
         REQUEST_COUNT.labels(agent_name="entity_engine", status="success").inc()
-        return {"entities": result}
-    except HTTPException:
-        raise
+        return {
+            "session_id": request.session_id,
+            "status": "success",
+            "file_refs": [],
+            "Properties": {
+                "entities": result
+            }
+        }
     except Exception as e:
         REQUEST_COUNT.labels(agent_name="entity_engine", status="error").inc()
         MODEL_ERROR_COUNT.labels(agent_name="entity_engine", error_type=type(e).__name__).inc()
         logger.error(f"Error in get_rules: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={
-            "error": str(e),
-            "agent": "entity_engine",
-            "status": "error"
-        })
+        return {
+            "session_id": request.session_id,
+            "status": "failed",
+            "file_refs": [],
+            "Properties": {
+                "error": str(e),
+                "agent": "entity_engine"
+            }
+        }
 
 if __name__ == "__main__":
     import uvicorn
