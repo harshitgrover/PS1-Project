@@ -74,7 +74,7 @@ class ConstraintAgent:
             entity_engine_url (str | None): URL for the Entity Constraint Engine API.
                 Defaults to the ECE_URL environment variable, falling back to localhost:8001.
         """
-        self.entity_engine_url = entity_engine_url or os.environ.get("ECE_URL", "http://localhost:8001")
+        self.entity_engine_url = entity_engine_url or os.environ.get("ECE_URL")
         logger.debug(f"ConstraintAgent initialized with entity_engine_url={self.entity_engine_url}")
 
         supabase_url = os.environ.get("SUPABASE_URL")

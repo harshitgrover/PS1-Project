@@ -1,0 +1,9 @@
+fastapi
+pydantic
+uvicorn
+prometheus-fastapi-instrumentator>=6.1.0
+prometheus-client>=0.20.0
+httpx
+python-dotenv
+supabase
+google-generativeai
