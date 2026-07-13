@@ -149,8 +149,7 @@ def seed_entity_constraint_engine_data():
             ("bedroom", "ensuite_required", 4.0, None, "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall."),
             ("corridor", "must_touch", 2.5, None, "Bathroom must connect to a corridor sharing at least 2.5ft of wall."),
             ("kitchen", "must_not_touch", None, None, "Bathroom must not share a wall with the kitchen."),
-            ("dining", "must_not_touch", None, None, "Bathroom must not share a wall with the dining room."),
-            ("bathroom", "must_not_touch", None, None, "Bathrooms must not share a wall with each other.")
+            ("dining", "must_not_touch", None, None, "Bathroom must not share a wall with the dining room.")
         ],
         "bedroom": [
             ("bathroom", "ensuite_required", 4.0, None, "Bathroom must be ensuite to the bedroom sharing at least 4ft of wall."),
@@ -172,7 +171,6 @@ def seed_entity_constraint_engine_data():
             ("kitchen", "must_touch", 2.5, None, "Kitchen must connect to the living room sharing at least 2.5ft of wall."),
             ("dining", "must_touch", 4.0, None, "Living room must connect to dining."),
             ("entry", "near", None, 2.0, "Living room should be near the entry within 2ft distance."),
-            ("balcony", "must_touch", 4.0, None, "Balcony must connect to the living room sharing at least 4ft of wall."),
             ("garage", "must_not_touch", None, None, "Garage must not share a wall with the living room."),
             ("entry", "distance_limit", None, 20.0, "Entry to Living must be < 20 ft.")
         ],
@@ -185,16 +183,13 @@ def seed_entity_constraint_engine_data():
         "corridor": [
             ("bedroom", "must_touch", 3.0, None, "Bedroom must connect to a corridor sharing at least 3ft of wall."),
             ("bathroom", "must_touch", 2.5, None, "Bathroom must connect to a corridor sharing at least 2.5ft of wall."),
-            ("living", "must_touch", 3.0, None, "Living room must connect to a corridor sharing at least 3ft of wall."),
-            ("kitchen", "must_touch", 3.0, None, "Kitchen must connect to a corridor sharing at least 3ft of wall.")
+            ("living", "must_touch", 3.0, None, "Living room must connect to a corridor sharing at least 3ft of wall.")
         ],
         "entry": [
             ("living", "near", None, 2.0, "Living room should be near the entry within 2ft distance."),
             ("living", "distance_limit", None, 20.0, "Entry to Living must be < 20 ft.")
         ],
-        "balcony": [
-            ("living", "must_touch", 4.0, None, "Balcony must connect to the living room sharing at least 4ft of wall.")
-        ],
+        "balcony": [],
         "garage": [
             ("living", "must_not_touch", None, None, "Garage must not share a wall with the living room."),
             ("kitchen", "distance_limit", None, 30.0, "Garage to Kitchen must be < 30 ft.")
