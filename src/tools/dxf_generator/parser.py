@@ -327,13 +327,7 @@ def parse_input_json(filepath: str) -> Dict[str, Any]:
         with open(filepath, 'r') as f:
             data = json.load(f)
             
-        # If wrapped in "Properties" -> "layout_output", extract it
-        if "Properties" in data and "layout_output" in data["Properties"]:
-            extracted_data = data["Properties"]["layout_output"]
-            # Keep session_id or other root level keys if needed
-            if "session_id" in data:
-                extracted_data["session_id"] = data["session_id"]
-            data = extracted_data
+
 
         # Check if universal contract
         if "views" in data:

@@ -566,8 +566,7 @@ if __name__ == "__main__":
         props = request_data.get("Properties", {})
         
         # Extract location_zoning_output schema
-        zoning_output = props.get("location_zoning_output", {})
-        zoning_schema = zoning_output.get("Properties", {}).get("schema", {})
+        zoning_schema = props.get("location_zoning_output", {})
         
         # Extract user text
         planner_data = props.get("planner_output", {})

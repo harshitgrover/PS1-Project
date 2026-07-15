@@ -75,8 +75,7 @@ def generate_constraints(request: ConstraintRequest) -> dict:
         
         # location_zoning_output and user_constraints come from Properties
         # user_constraints may come directly (for testing) or via planner_output
-        zoning_output = request.Properties.get("location_zoning_output", {})
-        zoning_schema = zoning_output.get("Properties", {}).get("schema", {})
+        zoning_schema = request.Properties.get("location_zoning_output", {})
         
         planner_data = request.Properties.get("planner_output", {})
         raw_user_constraints = request.Properties.get("user_constraints") or planner_data.get("user_constraints")

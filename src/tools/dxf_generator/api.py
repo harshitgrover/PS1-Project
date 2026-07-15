@@ -95,8 +95,12 @@ def generate_dxf_endpoint(request: DXFRequest, background_tasks: BackgroundTasks
         dxf_path = os.path.join(temp_dir, f"{file_id}.dxf")
         img_prefix = os.path.join(temp_dir, f"{file_id}")
         
-        # Get data from layout_output or directly from Properties
-        data = request.Properties.get("layout_output", request.Properties)
+        # Get data from the upstream agent's output block (e.g. layout_output, site_plan_output)
+        data = request.Properties
+        for key, value in request.Properties.items():
+            if key.endswith("_output") and isinstance(value, dict):
+                data = value
+                break
         
         with open(json_path, 'w') as f:
             json.dump(data, f)
